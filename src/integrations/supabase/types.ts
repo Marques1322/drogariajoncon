@@ -891,6 +891,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      registrar_movimentacao_estoque: {
+        Args: {
+          p_lote_id: string
+          p_medicamento_id: string
+          p_observacao?: string
+          p_quantidade: number
+          p_tipo: Database["public"]["Enums"]["mov_estoque_tipo"]
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "financeiro" | "estoque" | "atendente" | "gerente"
