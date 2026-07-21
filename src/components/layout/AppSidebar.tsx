@@ -39,6 +39,7 @@ const modules: NavItem[] = [
   { title: "Vendas", url: "/vendas", icon: ShoppingCart, roles: ["admin", "gerente", "atendente"] },
   { title: "Contas a Pagar", url: "/contas-pagar", icon: CreditCard, roles: ["admin", "gerente", "financeiro"] },
   { title: "Contas a Receber", url: "/contas-receber", icon: DollarSign, roles: ["admin", "gerente", "financeiro"] },
+  { title: "Financeiro", url: "/financeiro", icon: BarChart3, roles: ["admin", "gerente", "financeiro"] },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3, roles: ["admin", "gerente", "financeiro"] },
 ];
 
