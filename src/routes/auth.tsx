@@ -20,11 +20,15 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type Mode = "login" | "signup" | "forgot";
+
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nome, setNome] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -48,11 +52,26 @@ function AuthPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { nome_completo: nome },
+      },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Conta criada. Verifique seu e-mail se necessário.");
+  }
+
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Enviamos um link de recuperação para o seu e-mail.");
+    setMode("login");
   }
 
   async function handleGoogle() {
@@ -77,61 +96,97 @@ function AuthPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Acessar sistema</CardTitle>
-            <CardDescription>Entre com seu e-mail ou conta Google.</CardDescription>
+            <CardTitle>
+              {mode === "forgot" ? "Recuperar senha" : "Acessar sistema"}
+            </CardTitle>
+            <CardDescription>
+              {mode === "forgot"
+                ? "Informe seu e-mail para receber o link de redefinição."
+                : "Entre com seu e-mail ou conta Google."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar conta</TabsTrigger>
-              </TabsList>
+            {mode === "forgot" ? (
+              <form onSubmit={handleForgot} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-email">E-mail</Label>
+                  <Input id="forgot-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Enviando..." : "Enviar link"}
+                </Button>
+                <Button type="button" variant="ghost" className="w-full" onClick={() => setMode("login")}>
+                  Voltar
+                </Button>
+              </form>
+            ) : (
+              <>
+                <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="login">Entrar</TabsTrigger>
+                    <TabsTrigger value="signup">Criar conta</TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">E-mail</Label>
-                    <Input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Senha</Label>
-                    <Input id="login-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </form>
-              </TabsContent>
+                  <TabsContent value="login">
+                    <form onSubmit={handleLogin} className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="login-email">E-mail</Label>
+                        <Input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="login-password">Senha</Label>
+                          <button
+                            type="button"
+                            onClick={() => setMode("forgot")}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Esqueci minha senha
+                          </button>
+                        </div>
+                        <Input id="login-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? "Entrando..." : "Entrar"}
+                      </Button>
+                    </form>
+                  </TabsContent>
 
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail</Label>
-                    <Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
-                    <Input id="signup-password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Criando..." : "Criar conta"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="signup">
+                    <form onSubmit={handleSignup} className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-nome">Nome completo</Label>
+                        <Input id="signup-nome" required value={nome} onChange={(e) => setNome(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">E-mail</Label>
+                        <Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Senha</Label>
+                        <Input id="signup-password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? "Criando..." : "Criar conta"}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">ou</span>
-              </div>
-            </div>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">ou</span>
+                  </div>
+                </div>
 
-            <Button variant="outline" className="w-full" onClick={handleGoogle} type="button">
-              Continuar com Google
-            </Button>
+                <Button variant="outline" className="w-full" onClick={handleGoogle} type="button">
+                  Continuar com Google
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
