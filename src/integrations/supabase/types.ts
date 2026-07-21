@@ -87,6 +87,7 @@ export type Database = {
           endereco: string | null
           estado: string | null
           id: string
+          limite_credito: number
           nome: string
           observacoes: string | null
           rg: string | null
@@ -105,6 +106,7 @@ export type Database = {
           endereco?: string | null
           estado?: string | null
           id?: string
+          limite_credito?: number
           nome: string
           observacoes?: string | null
           rg?: string | null
@@ -123,6 +125,7 @@ export type Database = {
           endereco?: string | null
           estado?: string | null
           id?: string
+          limite_credito?: number
           nome?: string
           observacoes?: string | null
           rg?: string | null
