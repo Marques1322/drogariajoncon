@@ -77,15 +77,15 @@ async function fetchIndicators() {
     supabase
       .from("contas_pagar")
       .select("valor")
-      .in("status", ["pendente", "atrasada"]),
+      .in("status", ["pendente", "atrasado"]),
     supabase
       .from("contas_receber")
       .select("valor")
-      .in("status", ["pendente", "atrasada"]),
+      .in("status", ["pendente", "atrasado"]),
     supabase
       .from("vendas")
       .select("valor_total")
-      .eq("status", "finalizada")
+      .eq("status", "concluida")
       .gte("data_venda", inicioMes.toISOString()),
   ]);
 
@@ -115,7 +115,7 @@ async function fetchVendasDiarias() {
   const { data } = await supabase
     .from("vendas")
     .select("data_venda, valor_total, status")
-    .eq("status", "finalizada")
+    .eq("status", "concluida")
     .gte("data_venda", inicio.toISOString());
 
   const bucket = new Map<string, number>();
