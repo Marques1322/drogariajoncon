@@ -87,7 +87,7 @@ function ClientesPage() {
           .from("contas_receber")
           .select("cliente_id, valor, status")
           .in("cliente_id", ids)
-          .in("status", ["pendente", "atrasado", "parcial"]);
+          .in("status", ["pendente", "atrasado"]);
         (cr ?? []).forEach((r: any) => {
           if (!r.cliente_id) return;
           saldos[r.cliente_id] = (saldos[r.cliente_id] ?? 0) + Number(r.valor ?? 0);
@@ -322,7 +322,7 @@ function ClienteDetalhe({ cliente, onBack, onEdit }: { cliente: Cliente; onBack:
   const stats = useMemo(() => {
     const totalComprado = (vendasQ.data ?? []).reduce((s: number, v: any) => s + Number(v.valor_total ?? 0), 0);
     const emAberto = (parcelasQ.data ?? [])
-      .filter((p: any) => ["pendente", "atrasado", "parcial"].includes(p.status))
+      .filter((p: any) => ["pendente", "atrasado"].includes(p.status))
       .reduce((s: number, p: any) => s + Number(p.valor ?? 0), 0);
     return { totalComprado, emAberto };
   }, [vendasQ.data, parcelasQ.data]);
