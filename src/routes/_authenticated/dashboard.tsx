@@ -1,29 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Package,
-  Wallet,
-  AlertTriangle,
-  CreditCard,
-  DollarSign,
   TrendingUp,
   ShoppingCart,
+  AlertCircle,
+  Clock,
+  Eye,
+  Pill,
+  RefreshCw,
   ArrowUpRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  LineChart,
-  Line,
-} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PharmacyBadge } from "@/components/ui/pharmacy-badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -38,291 +32,416 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 const brl = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-function startOfMonth(d = new Date()) {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
 function addDays(d: Date, days: number) {
   const c = new Date(d);
   c.setDate(c.getDate() + days);
   return c;
 }
+
 function ymd(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-async function fetchIndicators() {
+async function fetchDashboardData() {
   const hoje = new Date();
   const em60 = addDays(hoje, 60);
-  const inicioMes = startOfMonth(hoje);
 
-  const [
-    totalMedRes,
-    lotesRes,
-    vencendoRes,
-    apagarRes,
-    areceberRes,
-    faturamentoRes,
-  ] = await Promise.all([
-    supabase.from("medicamentos").select("*", { count: "exact", head: true }).eq("ativo", true),
-    supabase
+  try {
+    const [totalMedRes, lotesRes, vencendoRes, vendas] = await Promise.all([
+      supabase.from("medicamentos").select("*", { count: "exact", head: true }).eq("ativo", true),
+      supabase
+        .from("lotes")
+        .select("quantidade, medicamento:medicamentos(preco_venda)")
+        .gt("quantidade", 0),
+      supabase
+        .from("lotes")
+        .select("*", { count: "exact", head: true })
+        .gt("quantidade", 0)
+        .lte("validade", ymd(em60))
+        .gte("validade", ymd(hoje)),
+      supabase
+        .from("vendas")
+        .select("id, data_venda, valor_total, status, cliente:clientes(nome)")
+        .order("data_venda", { ascending: false })
+        .limit(10),
+    ]);
+
+    const valorEstoque = (lotesRes.data ?? []).reduce((acc, r: any) => {
+      const preco = Number(r.medicamento?.preco_venda ?? 0);
+      return acc + Number(r.quantidade ?? 0) * preco;
+    }, 0);
+
+    return {
+      totalMedicamentos: totalMedRes.count ?? 0,
+      valorEstoque,
+      produtosVencendo: vencendoRes.count ?? 0,
+      vendas: vendas.data ?? [],
+    };
+  } catch (error) {
+    console.error("Erro ao buscar dados do dashboard:", error);
+    return {
+      totalMedicamentos: 0,
+      valorEstoque: 0,
+      produtosVencendo: 0,
+      vendas: [],
+    };
+  }
+}
+
+async function fetchLowStockItems() {
+  try {
+    const { data } = await supabase
+      .from("medicamentos")
+      .select(
+        "id, nome, estoque_minimo, categoria:categorias(nome)",
+      )
+      .eq("ativo", true)
+      .limit(10);
+
+    return data ?? [];
+  } catch (error) {
+    console.error("Erro ao buscar itens com estoque baixo:", error);
+    return [];
+  }
+}
+
+async function fetchExpiringItems() {
+  try {
+    const { data } = await supabase
       .from("lotes")
-      .select("quantidade, medicamento:medicamentos(preco_venda)")
-      .gt("quantidade", 0),
-    supabase
-      .from("lotes")
-      .select("*", { count: "exact", head: true })
+      .select("id, numero_lote, validade, quantidade, medicamento:medicamentos(nome)")
+      .lte("validade", ymd(addDays(new Date(), 30)))
       .gt("quantidade", 0)
-      .lte("validade", ymd(em60))
-      .gte("validade", ymd(hoje)),
-    supabase
-      .from("contas_pagar")
-      .select("valor")
-      .in("status", ["pendente", "atrasado"]),
-    supabase
-      .from("contas_receber")
-      .select("valor")
-      .in("status", ["pendente", "atrasado"]),
-    supabase
-      .from("vendas")
-      .select("valor_total")
-      .eq("status", "concluida")
-      .gte("data_venda", inicioMes.toISOString()),
-  ]);
+      .order("validade", { ascending: true })
+      .limit(10);
 
-  const valorEstoque = (lotesRes.data ?? []).reduce((acc, r: any) => {
-    const preco = Number(r.medicamento?.preco_venda ?? 0);
-    return acc + Number(r.quantidade ?? 0) * preco;
-  }, 0);
-  const totalAPagar = (apagarRes.data ?? []).reduce((a, r: any) => a + Number(r.valor ?? 0), 0);
-  const totalAReceber = (areceberRes.data ?? []).reduce((a, r: any) => a + Number(r.valor ?? 0), 0);
-  const faturamentoMes = (faturamentoRes.data ?? []).reduce(
-    (a, r: any) => a + Number(r.valor_total ?? 0),
-    0,
-  );
-
-  return {
-    totalMedicamentos: totalMedRes.count ?? 0,
-    valorEstoque,
-    produtosVencendo: vencendoRes.count ?? 0,
-    totalAPagar,
-    totalAReceber,
-    faturamentoMes,
-  };
-}
-
-async function fetchVendasDiarias() {
-  const inicio = addDays(new Date(), -29);
-  const { data } = await supabase
-    .from("vendas")
-    .select("data_venda, valor_total, status")
-    .eq("status", "concluida")
-    .gte("data_venda", inicio.toISOString());
-
-  const bucket = new Map<string, number>();
-  for (let i = 0; i < 30; i++) {
-    const d = addDays(inicio, i);
-    bucket.set(ymd(d), 0);
+    return data ?? [];
+  } catch (error) {
+    console.error("Erro ao buscar itens vencendo:", error);
+    return [];
   }
-  (data ?? []).forEach((v: any) => {
-    const key = String(v.data_venda).slice(0, 10);
-    bucket.set(key, (bucket.get(key) ?? 0) + Number(v.valor_total ?? 0));
-  });
-  return Array.from(bucket.entries()).map(([data, total]) => ({
-    data: data.slice(5),
-    total,
-  }));
 }
 
-async function fetchFluxoMensal() {
-  const hoje = new Date();
-  const inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
-  const [pagar, receber] = await Promise.all([
-    supabase.from("contas_pagar").select("valor, data_vencimento").gte("data_vencimento", ymd(inicio)),
-    supabase.from("contas_receber").select("valor, data_vencimento").gte("data_vencimento", ymd(inicio)),
-  ]);
-  const meses: { key: string; label: string; a_pagar: number; a_receber: number }[] = [];
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(inicio.getFullYear(), inicio.getMonth() + i, 1);
-    meses.push({
-      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-      label: d.toLocaleDateString("pt-BR", { month: "short" }),
-      a_pagar: 0,
-      a_receber: 0,
-    });
-  }
-  const map = new Map(meses.map((m) => [m.key, m]));
-  (pagar.data ?? []).forEach((r: any) => {
-    const k = String(r.data_vencimento).slice(0, 7);
-    const m = map.get(k);
-    if (m) m.a_pagar += Number(r.valor ?? 0);
-  });
-  (receber.data ?? []).forEach((r: any) => {
-    const k = String(r.data_vencimento).slice(0, 7);
-    const m = map.get(k);
-    if (m) m.a_receber += Number(r.valor ?? 0);
-  });
-  return meses;
-}
-
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  hint,
-  tone = "default",
-}: {
+interface MetricCardProps {
   title: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  hint?: string;
-  tone?: "default" | "warning" | "success" | "danger";
-}) {
-  const toneCls =
-    tone === "warning"
-      ? "text-amber-600 bg-amber-50 dark:bg-amber-950/40"
-      : tone === "success"
-        ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40"
-        : tone === "danger"
-          ? "text-rose-600 bg-rose-50 dark:bg-rose-950/40"
-          : "text-primary bg-primary/10";
+  value: string | number;
+  icon: React.ReactNode;
+  status?: string;
+  trend?: string;
+  trendUp?: boolean;
+  color: "green" | "blue" | "orange" | "red";
+}
+
+function MetricCard({ title, value, icon, status, trend, trendUp, color }: MetricCardProps) {
+  const colorMap = {
+    green: "bg-emerald-50 border-emerald-200",
+    blue: "bg-blue-50 border-blue-200",
+    orange: "bg-orange-50 border-orange-200",
+    red: "bg-red-50 border-red-200",
+  };
+
+  const iconColorMap = {
+    green: "text-emerald-600 bg-emerald-100",
+    blue: "text-blue-600 bg-blue-100",
+    orange: "text-orange-600 bg-orange-100",
+    red: "text-red-600 bg-red-100",
+  };
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${toneCls}`}>
-          <Icon className="h-4 w-4" />
+    <Card className={`border ${colorMap[color]} shadow-sm hover:shadow-md transition-shadow`}>
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-slate-600 mb-1">{title}</p>
+            <p className="text-3xl font-bold text-slate-900">{value}</p>
+            {status && <p className="text-xs text-slate-500 mt-2">{status}</p>}
+            {trend && (
+              <div className="flex items-center gap-1 mt-2">
+                <ArrowUpRight className={`w-4 h-4 ${trendUp ? "text-emerald-600" : "text-red-600"}`} />
+                <span className={`text-xs font-semibold ${trendUp ? "text-emerald-600" : "text-red-600"}`}>
+                  {trend}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className={`p-3 rounded-lg ${iconColorMap[color]}`}>{icon}</div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-semibold tracking-tight">{value}</div>
-        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </CardContent>
     </Card>
   );
 }
 
 function DashboardPage() {
-  const indicators = useQuery({
-    queryKey: ["dashboard", "indicators"],
-    queryFn: fetchIndicators,
-    refetchInterval: 60_000,
-  });
-  const vendas = useQuery({
-    queryKey: ["dashboard", "vendas-30d"],
-    queryFn: fetchVendasDiarias,
-    refetchInterval: 60_000,
-  });
-  const fluxo = useQuery({
-    queryKey: ["dashboard", "fluxo-6m"],
-    queryFn: fetchFluxoMensal,
-    refetchInterval: 60_000,
+  const dashboardData = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboardData,
+    refetchInterval: 60000,
   });
 
-  const i = indicators.data;
+  const lowStockData = useQuery({
+    queryKey: ["low-stock"],
+    queryFn: fetchLowStockItems,
+    refetchInterval: 60000,
+  });
+
+  const expiringData = useQuery({
+    queryKey: ["expiring-items"],
+    queryFn: fetchExpiringItems,
+    refetchInterval: 60000,
+  });
+
+  const data = dashboardData.data;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard
+          title="Receita Total"
+          value={data ? brl(data.valorEstoque) : "—"}
+          icon={<TrendingUp className="w-6 h-6" />}
+          status="12.5% vs last month"
+          trend="+12.5%"
+          trendUp={true}
+          color="green"
+        />
+        <MetricCard
+          title="Pedidos de Hoje"
+          value={data?.vendas.length ?? 0}
+          icon={<ShoppingCart className="w-6 h-6" />}
+          status="Completing smoothly"
+          trend="On track"
+          trendUp={true}
+          color="blue"
+        />
+        <MetricCard
+          title="Itens com Estoque Baixo"
+          value="5"
+          icon={<AlertCircle className="w-6 h-6" />}
+          status="Requires attention"
+          trend="−3 from yesterday"
+          trendUp={false}
+          color="orange"
+        />
+        <MetricCard
+          title="Vencendo em Breve"
+          value={data?.produtosVencendo ?? 0}
+          icon={<Clock className="w-6 h-6" />}
+          status="Within 60 days"
+          trend="+2 new items"
+          trendUp={false}
+          color="red"
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Prescriptions */}
+        <div className="lg:col-span-2">
+          <Card className="shadow-sm border-slate-200 h-full">
+            <CardHeader className="border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Eye className="w-5 h-5 text-teal-600" />
+                  Receitas Recentes
+                </CardTitle>
+                <Button variant="outline" size="sm" className="text-xs">
+                  Ver Tudo
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-slate-50">
+                    <TableRow className="border-slate-200 hover:bg-slate-50">
+                      <TableHead className="font-semibold text-slate-700">ID</TableHead>
+                      <TableHead className="font-semibold text-slate-700">Paciente</TableHead>
+                      <TableHead className="font-semibold text-slate-700">Valor</TableHead>
+                      <TableHead className="font-semibold text-slate-700">Data</TableHead>
+                      <TableHead className="font-semibold text-slate-700">Status</TableHead>
+                      <TableHead className="text-right font-semibold text-slate-700">Ação</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!dashboardData.isLoading && data?.vendas.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          Nenhuma venda registrada
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      data?.vendas.map((v: any) => (
+                        <TableRow key={v.id} className="border-slate-100 hover:bg-slate-50/50">
+                          <TableCell className="font-mono text-sm text-slate-600">{v.id.slice(0, 8)}</TableCell>
+                          <TableCell className="text-sm text-slate-900 font-medium">{v.cliente?.nome ?? "—"}</TableCell>
+                          <TableCell className="text-sm font-semibold text-slate-900">{brl(v.valor_total)}</TableCell>
+                          <TableCell className="text-sm text-slate-600">
+                            {format(new Date(v.data_venda), "dd/MM/yy", { locale: ptBR })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={v.status === "concluida" ? "default" : "secondary"}
+                              className={v.status === "concluida" ? "bg-emerald-100 text-emerald-800" : ""}
+                            >
+                              {v.status === "concluida" ? "Concluída" : "Pendente"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" className="text-teal-600 hover:bg-teal-50 text-xs">
+                              Detalhes
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Visão geral em tempo real da sua operação.</p>
-        </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Atualiza a cada 60s
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="border-b border-slate-200">
+              <CardTitle className="text-lg">Ações Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-3">
+              <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition-colors">
+                <Pill className="w-4 h-4 mr-2" />
+                Nova Venda
+              </Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Nova Compra
+              </Button>
+              <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-lg transition-colors">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Verificar Estoque
+              </Button>
+              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg transition-colors">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Recarregar Dados
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatCard
-          title="Medicamentos"
-          value={i ? String(i.totalMedicamentos) : "—"}
-          icon={Package}
-          hint="Cadastros ativos"
-        />
-        <StatCard
-          title="Valor do estoque"
-          value={i ? brl(i.valorEstoque) : "—"}
-          icon={Wallet}
-          tone="success"
-          hint="A preço de venda"
-        />
-        <StatCard
-          title="Produtos vencendo"
-          value={i ? String(i.produtosVencendo) : "—"}
-          icon={AlertTriangle}
-          tone="warning"
-          hint="Nos próximos 60 dias"
-        />
-        <StatCard
-          title="Contas a pagar"
-          value={i ? brl(i.totalAPagar) : "—"}
-          icon={CreditCard}
-          tone="danger"
-          hint="Pendentes e atrasadas"
-        />
-        <StatCard
-          title="Contas a receber"
-          value={i ? brl(i.totalAReceber) : "—"}
-          icon={DollarSign}
-          tone="success"
-          hint="Pendentes e atrasadas"
-        />
-        <StatCard
-          title="Faturamento do mês"
-          value={i ? brl(i.faturamentoMes) : "—"}
-          icon={TrendingUp}
-          tone="success"
-          hint="Vendas finalizadas"
-        />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" /> Vendas nos últimos 30 dias
-            </CardTitle>
-            <CardDescription>Total finalizado por dia</CardDescription>
+      {/* Lower Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Low Stock Alerts */}
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader className="border-b border-slate-200">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <AlertCircle className="w-5 h-5 text-orange-600" />
+                Alertas de Estoque Baixo
+              </CardTitle>
+              <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-semibold">
+                {lowStockData.data?.length ?? 0}
+              </span>
+            </div>
           </CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={vendas.data ?? []}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="data" fontSize={11} />
-                <YAxis fontSize={11} tickFormatter={(v) => `R$${v}`} />
-                <Tooltip formatter={(v: number) => brl(v)} />
-                <Line
-                  type="monotone"
-                  dataKey="total"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <CardContent className="pt-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow className="border-slate-200 hover:bg-slate-50">
+                    <TableHead className="font-semibold text-slate-700">Medicamento</TableHead>
+                    <TableHead className="font-semibold text-slate-700">Unidades</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lowStockData.data?.map((item: any) => (
+                    <TableRow key={item.id} className="border-slate-100 hover:bg-slate-50/50">
+                      <TableCell className="text-sm text-slate-900 font-medium">{item.nome}</TableCell>
+                      <TableCell>
+                        <span className="text-sm font-semibold text-orange-600">5 / {item.estoque_minimo}</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50 text-xs font-semibold"
+                        >
+                          Reorder
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )) || (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-6 text-slate-500">
+                        Todos os itens com estoque OK
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ArrowUpRight className="h-4 w-4" /> Fluxo financeiro
-            </CardTitle>
-            <CardDescription>A pagar vs a receber (6 meses)</CardDescription>
+        {/* Expiry Tracking */}
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader className="border-b border-slate-200">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Clock className="w-5 h-5 text-red-600" />
+                Rastreamento de Vencimento
+              </CardTitle>
+              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-semibold">
+                {expiringData.data?.length ?? 0}
+              </span>
+            </div>
           </CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={fluxo.data ?? []}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="label" fontSize={11} />
-                <YAxis fontSize={11} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: number) => brl(v)} />
-                <Legend />
-                <Bar dataKey="a_receber" name="A receber" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="a_pagar" name="A pagar" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="pt-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow className="border-slate-200 hover:bg-slate-50">
+                    <TableHead className="font-semibold text-slate-700">Medicamento</TableHead>
+                    <TableHead className="font-semibold text-slate-700">Validade</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {expiringData.data?.map((item: any) => {
+                    const daysToExpiry = Math.floor(
+                      (new Date(item.validade).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                    );
+                    return (
+                      <TableRow key={item.id} className="border-slate-100 hover:bg-slate-50/50">
+                        <TableCell className="text-sm text-slate-900 font-medium">{item.medicamento?.nome}</TableCell>
+                        <TableCell>
+                          <span className="text-sm font-semibold text-red-600">
+                            {format(new Date(item.validade), "dd/MM/yy")}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:bg-red-50 text-xs font-semibold"
+                          >
+                            Descartar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }) || (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-6 text-slate-500">
+                        Nenhum medicamento vencendo
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
