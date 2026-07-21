@@ -894,6 +894,36 @@ export type Database = {
         }
         Returns: boolean
       }
+      marcar_contas_atrasadas: { Args: never; Returns: undefined }
+      pagar_duplicata: {
+        Args: {
+          p_conta_id: string
+          p_data?: string
+          p_forma: Database["public"]["Enums"]["pagamento_forma"]
+          p_valor_pago: number
+        }
+        Returns: undefined
+      }
+      receber_parcela: {
+        Args: {
+          p_conta_id: string
+          p_data?: string
+          p_forma: Database["public"]["Enums"]["pagamento_forma"]
+          p_valor_recebido: number
+        }
+        Returns: undefined
+      }
+      registrar_compra: {
+        Args: {
+          p_data_compra: string
+          p_fornecedor_id: string
+          p_itens: Json
+          p_numero_nota: string
+          p_observacoes: string
+          p_parcelas: Json
+        }
+        Returns: string
+      }
       registrar_movimentacao_estoque: {
         Args: {
           p_lote_id: string
@@ -901,6 +931,17 @@ export type Database = {
           p_observacao?: string
           p_quantidade: number
           p_tipo: Database["public"]["Enums"]["mov_estoque_tipo"]
+        }
+        Returns: string
+      }
+      registrar_venda: {
+        Args: {
+          p_cliente_id: string
+          p_desconto: number
+          p_forma_pagamento: Database["public"]["Enums"]["pagamento_forma"]
+          p_itens: Json
+          p_observacoes: string
+          p_parcelas: Json
         }
         Returns: string
       }
