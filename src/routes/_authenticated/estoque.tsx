@@ -341,7 +341,7 @@ function NovaMovimentacaoDialog({
         p_lote_id: loteId,
         p_tipo: tipo,
         p_quantidade: qtd,
-        p_observacao: observacao.trim() || null,
+        p_observacao: observacao.trim() || undefined,
       });
       if (error) throw error;
     },
