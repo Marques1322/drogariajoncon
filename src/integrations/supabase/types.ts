@@ -621,6 +621,7 @@ export type Database = {
           ativo: boolean
           categoria_id: string | null
           codigo_barras: string | null
+          codigo_interno: string | null
           concentracao: string | null
           controlado: boolean
           created_at: string
@@ -633,6 +634,7 @@ export type Database = {
             | null
           fornecedor_padrao_id: string | null
           id: string
+          localizacao: string | null
           nome: string
           preco_custo: number
           preco_venda: number
@@ -645,6 +647,7 @@ export type Database = {
           ativo?: boolean
           categoria_id?: string | null
           codigo_barras?: string | null
+          codigo_interno?: string | null
           concentracao?: string | null
           controlado?: boolean
           created_at?: string
@@ -657,6 +660,7 @@ export type Database = {
             | null
           fornecedor_padrao_id?: string | null
           id?: string
+          localizacao?: string | null
           nome: string
           preco_custo?: number
           preco_venda?: number
@@ -669,6 +673,7 @@ export type Database = {
           ativo?: boolean
           categoria_id?: string | null
           codigo_barras?: string | null
+          codigo_interno?: string | null
           concentracao?: string | null
           controlado?: boolean
           created_at?: string
@@ -681,6 +686,7 @@ export type Database = {
             | null
           fornecedor_padrao_id?: string | null
           id?: string
+          localizacao?: string | null
           nome?: string
           preco_custo?: number
           preco_venda?: number
