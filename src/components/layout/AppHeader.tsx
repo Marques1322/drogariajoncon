@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { LogOut, UserCircle2 } from "lucide-react";
+import { LogOut, UserCircle2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,14 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth, ROLE_LABELS } from "@/hooks/use-auth";
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const { user, roles } = useAuth();
   const [email, setEmail] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
-  }, []);
+  useEffect(() => setEmail(user?.email ?? null), [user]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -27,7 +28,14 @@ export function AppHeader() {
 
   return (
     <div className="flex-1 flex items-center justify-between">
-      <div />
+      <div className="flex items-center gap-2">
+        {roles.map((role) => (
+          <Badge key={role} variant="secondary" className="gap-1">
+            <ShieldCheck className="h-3 w-3" />
+            {ROLE_LABELS[role]}
+          </Badge>
+        ))}
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="gap-2">

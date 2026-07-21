@@ -9,6 +9,9 @@ import {
   BarChart3,
   Settings,
   Pill,
+  Truck,
+  Receipt,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,24 +25,52 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth, canAccess, type AppRole } from "@/hooks/use-auth";
 
-const modules = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Produtos", url: "/produtos", icon: Package },
-  { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Vendas", url: "/vendas", icon: ShoppingCart },
-  { title: "Estoque", url: "/estoque", icon: Warehouse },
-  { title: "Financeiro", url: "/financeiro", icon: DollarSign },
-  { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
+type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }>; roles: AppRole[] };
+
+const modules: NavItem[] = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, roles: ["admin", "financeiro", "estoque", "atendente", "gerente"] },
+  { title: "Medicamentos", url: "/produtos", icon: Package, roles: ["admin", "gerente", "estoque"] },
+  { title: "Estoque", url: "/estoque", icon: Warehouse, roles: ["admin", "gerente", "estoque"] },
+  { title: "Fornecedores", url: "/fornecedores", icon: Truck, roles: ["admin", "gerente", "estoque"] },
+  { title: "Compras", url: "/compras", icon: Receipt, roles: ["admin", "gerente", "estoque"] },
+  { title: "Clientes", url: "/clientes", icon: Users, roles: ["admin", "gerente", "atendente"] },
+  { title: "Vendas", url: "/vendas", icon: ShoppingCart, roles: ["admin", "gerente", "atendente"] },
+  { title: "Contas a Pagar", url: "/contas-pagar", icon: CreditCard, roles: ["admin", "gerente", "financeiro"] },
+  { title: "Contas a Receber", url: "/contas-receber", icon: DollarSign, roles: ["admin", "gerente", "financeiro"] },
+  { title: "Relatórios", url: "/relatorios", icon: BarChart3, roles: ["admin", "gerente", "financeiro"] },
 ];
 
-const system = [{ title: "Configurações", url: "/configuracoes", icon: Settings }];
+const system: NavItem[] = [
+  { title: "Usuários", url: "/configuracoes/usuarios", icon: Users, roles: ["admin"] },
+  { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] },
+];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
+  const { roles } = useAuth();
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + "/");
+
+  const visibleModules = modules.filter((m) => canAccess(m.url, roles));
+  const visibleSystem = system.filter((m) => canAccess(m.url, roles));
+
+  const renderItems = (items: NavItem[]) => (
+    <SidebarMenu>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.url}>
+          <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+            <Link to={item.url} className="flex items-center gap-2">
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -59,38 +90,14 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Módulos</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {modules.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderItems(visibleModules)}</SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Sistema</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {system.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {visibleSystem.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+            <SidebarGroupContent>{renderItems(visibleSystem)}</SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
