@@ -205,8 +205,8 @@ function NovaVendaDialog({ open, onOpenChange, onDone }: { open: boolean; onOpen
       }
 
       const { error } = await supabase.rpc("registrar_venda", {
-        p_cliente_id: clienteId || null,
-        p_forma_pagamento: forma,
+        p_cliente_id: clienteId || null as any,
+        p_forma_pagamento: forma as any,
         p_desconto: Number(desconto) || 0,
         p_observacoes: obs,
         p_itens: items as any,

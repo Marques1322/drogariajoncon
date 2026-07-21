@@ -185,7 +185,7 @@ function PagarDialog({ id, conta, onOpenChange, onDone }: { id: string | null; c
       const { error } = await supabase.rpc("pagar_duplicata", {
         p_conta_id: id!,
         p_valor_pago: Number(valor),
-        p_forma: forma,
+        p_forma: forma as any,
         p_data: data,
       });
       if (error) throw error;

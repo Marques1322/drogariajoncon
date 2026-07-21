@@ -177,7 +177,7 @@ function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpe
   });
   const medsQ = useQuery({
     queryKey: ["meds-options-ativos"],
-    queryFn: async () => (await supabase.from("medicamentos").select("id, nome, preco_compra").eq("ativo", true).order("nome")).data ?? [],
+    queryFn: async () => (await supabase.from("medicamentos").select("id, nome, preco_custo").eq("ativo", true).order("nome")).data ?? [],
   });
 
   const total = useMemo(
@@ -280,7 +280,7 @@ function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpe
                         <TableCell>
                           <Select value={it.medicamento_id} onValueChange={(v) => {
                             const m = (medsQ.data ?? []).find((x: any) => x.id === v);
-                            setItens(itens.map((x, i) => i === idx ? { ...x, medicamento_id: v, preco_unitario: x.preco_unitario || String(m?.preco_compra ?? "") } : x));
+                            setItens(itens.map((x, i) => i === idx ? { ...x, medicamento_id: v, preco_unitario: x.preco_unitario || String(m?.preco_custo ?? "") } : x));
                           }}>
                             <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                             <SelectContent>

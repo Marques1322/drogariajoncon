@@ -179,7 +179,7 @@ function ReceberDialog({ id, conta, onOpenChange, onDone }: { id: string | null;
       const { error } = await supabase.rpc("receber_parcela", {
         p_conta_id: id!,
         p_valor_recebido: Number(valor),
-        p_forma: forma,
+        p_forma: forma as any,
         p_data: data,
       });
       if (error) throw error;
