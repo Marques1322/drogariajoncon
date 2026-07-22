@@ -316,6 +316,12 @@ function NovaMovimentacaoDialog({
   const [tipo, setTipo] = useState<MovTipo>("entrada");
   const [quantidade, setQuantidade] = useState("");
   const [observacao, setObservacao] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setMedicamentoId(""); setLoteId(""); setQuantidade(""); setObservacao("");
+    setTipo("entrada"); setFormError(null);
+  };
 
   const lotesQ = useQuery({
     queryKey: ["lotes-do-med", medicamentoId],
@@ -331,31 +337,54 @@ function NovaMovimentacaoDialog({
     },
   });
 
+  const extractErrorMessage = (e: unknown): string => {
+    if (!e) return "Erro desconhecido ao registrar movimentação.";
+    if (typeof e === "string") return e;
+    const anyE = e as any;
+    return anyE.message || anyE.error_description || anyE.details || anyE.hint || "Erro ao registrar movimentação.";
+  };
+
   const mut = useMutation({
     mutationFn: async () => {
       const qtd = parseInt(quantidade, 10);
-      if (!medicamentoId || !loteId) throw new Error("Selecione medicamento e lote");
-      if (!qtd || qtd === 0) throw new Error("Quantidade inválida");
+      if (!medicamentoId) throw new Error("Selecione o medicamento.");
+      if (!loteId) throw new Error("Selecione o lote.");
+      if (Number.isNaN(qtd) || qtd === 0) throw new Error("Informe uma quantidade válida (diferente de zero).");
+      if (tipo !== "ajuste" && qtd < 0) throw new Error("Quantidade deve ser positiva para este tipo de movimentação.");
       const { error } = await supabase.rpc("registrar_movimentacao_estoque", {
         p_medicamento_id: medicamentoId,
         p_lote_id: loteId,
         p_tipo: tipo,
         p_quantidade: qtd,
-        p_observacao: observacao.trim() || undefined,
-      });
+        p_observacao: observacao.trim() ? observacao.trim() : null,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Movimentação registrada.");
-      setMedicamentoId(""); setLoteId(""); setQuantidade(""); setObservacao(""); setTipo("entrada");
+      resetForm();
       onOpenChange(false);
       onDone();
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro ao registrar."),
+    onError: (e: unknown) => {
+      const msg = extractErrorMessage(e);
+      setFormError(msg);
+      toast.error(msg);
+    },
   });
 
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    try {
+      mut.mutate();
+    } catch (err) {
+      setFormError(extractErrorMessage(err));
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { resetForm(); } onOpenChange(o); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Nova movimentação</DialogTitle>
@@ -363,7 +392,12 @@ function NovaMovimentacaoDialog({
             Registre entrada, saída, perda, devolução ou ajuste. O estoque do lote é atualizado automaticamente.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid gap-4">
+        <form onSubmit={submit} className="grid gap-4">
+          {formError && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {formError}
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Tipo</Label>
             <Select value={tipo} onValueChange={(v) => setTipo(v as MovTipo)}>
@@ -398,7 +432,7 @@ function NovaMovimentacaoDialog({
                     {l.numero_lote} — val. {format(new Date(l.validade), "dd/MM/yyyy")} — saldo {l.quantidade}
                   </SelectItem>
                 ))}
-                {(lotesQ.data ?? []).length === 0 && medicamentoId && (
+                {(lotesQ.data ?? []).length === 0 && medicamentoId && !lotesQ.isLoading && (
                   <div className="px-2 py-1.5 text-xs text-muted-foreground">Nenhum lote cadastrado. Crie um lote primeiro.</div>
                 )}
               </SelectContent>
@@ -419,7 +453,7 @@ function NovaMovimentacaoDialog({
             <Textarea rows={2} value={observacao} onChange={(e) => setObservacao(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }}>Cancelar</Button>
             <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Registrando..." : "Registrar"}</Button>
           </DialogFooter>
         </form>
