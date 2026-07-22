@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const navigationItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Inventário", href: "/estoque", icon: Package },
+  
   { label: "Vendas", href: "/vendas", icon: ShoppingCart },
   { label: "Medicamentos", href: "/produtos", icon: Package },
   { label: "Clientes", href: "/clientes", icon: Users },
