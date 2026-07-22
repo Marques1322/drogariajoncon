@@ -226,12 +226,13 @@ function NovaVendaDialog({ open, onOpenChange, onDone }: { open: boolean; onOpen
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <DialogTitle>Nova venda</DialogTitle>
           <DialogDescription>À vista ou a prazo. Estoque é baixado automaticamente pelo lote mais próximo do vencimento.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
+        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2 sm:col-span-2">
               <Label>Cliente {modo === "prazo" && <span className="text-destructive">*</span>}</Label>
@@ -332,8 +333,9 @@ function NovaVendaDialog({ open, onOpenChange, onDone }: { open: boolean; onOpen
             </div>
             <div className="space-y-2 sm:col-span-2"><Label>Observações</Label><Textarea rows={2} value={obs} onChange={(e) => setObs(e.target.value)} /></div>
           </div>
+          </div>
 
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t bg-background">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Salvando..." : "Salvar venda"}</Button>
           </DialogFooter>
