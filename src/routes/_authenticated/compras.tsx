@@ -236,11 +236,20 @@ function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpe
         <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2 sm:col-span-2">
-              <Label>Fornecedor *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Fornecedor *</Label>
+                <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setNovoFornOpen(true)}>
+                  <Plus className="h-3 w-3 mr-1" /> Criar Novo Fornecedor
+                </Button>
+              </div>
               <Select value={fornecedorId} onValueChange={setFornecedorId}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
-                  {(fornQ.data ?? []).map((f: any) => <SelectItem key={f.id} value={f.id}>{f.razao_social}</SelectItem>)}
+                  {(fornQ.data ?? []).length === 0 ? (
+                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      Nenhum fornecedor encontrado. Cadastre um para continuar.
+                    </div>
+                  ) : (fornQ.data ?? []).map((f: any) => <SelectItem key={f.id} value={f.id}>{f.razao_social}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
