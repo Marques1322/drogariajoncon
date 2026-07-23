@@ -227,6 +227,7 @@ function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpe
   });
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
