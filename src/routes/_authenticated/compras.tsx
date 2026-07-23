@@ -164,12 +164,14 @@ function ComprasPage() {
 }
 
 function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void }) {
+  const qc = useQueryClient();
   const [fornecedorId, setFornecedorId] = useState("");
   const [numeroNota, setNumeroNota] = useState("");
   const [dataCompra, setDataCompra] = useState(new Date().toISOString().slice(0, 10));
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<ItemLinha[]>([{ medicamento_id: "", numero_lote: "", validade: "", quantidade: "", preco_unitario: "" }]);
   const [parcelas, setParcelas] = useState<ParcelaLinha[]>([]);
+  const [novoFornOpen, setNovoFornOpen] = useState(false);
 
   const fornQ = useQuery({
     queryKey: ["forns-options"],
