@@ -384,5 +384,88 @@ function NovaCompraDialog({ open, onOpenChange, onDone }: { open: boolean; onOpe
         </form>
       </DialogContent>
     </Dialog>
+    <NovoFornecedorRapidoDialog
+      open={novoFornOpen}
+      onOpenChange={setNovoFornOpen}
+      onCreated={(id) => {
+        qc.invalidateQueries({ queryKey: ["forns-options"] });
+        qc.invalidateQueries({ queryKey: ["fornecedores"] });
+        setFornecedorId(id);
+      }}
+    />
+    </>
   );
 }
+
+function NovoFornecedorRapidoDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (o: boolean) => void; onCreated: (id: string) => void }) {
+  const [razaoSocial, setRazaoSocial] = useState("");
+  const [nomeFantasia, setNomeFantasia] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [email, setEmail] = useState("");
+
+  const reset = () => { setRazaoSocial(""); setNomeFantasia(""); setCnpj(""); setTelefone(""); setEmail(""); };
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      if (!razaoSocial.trim()) throw new Error("Informe a razão social.");
+      const { data, error } = await supabase.from("fornecedores").insert({
+        razao_social: razaoSocial.trim(),
+        nome_fantasia: nomeFantasia.trim() || null,
+        cnpj: cnpj.trim() || null,
+        telefone: telefone.trim() || null,
+        email: email.trim() || null,
+        ativo: true,
+      }).select("id").single();
+      if (error) throw error;
+      return data.id as string;
+    },
+    onSuccess: (id) => {
+      toast.success("Fornecedor cadastrado.");
+      onCreated(id);
+      reset();
+      onOpenChange(false);
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao cadastrar fornecedor."),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Novo fornecedor</DialogTitle>
+          <DialogDescription>Cadastro rápido. Você pode completar os demais dados depois em Fornecedores.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="space-y-3">
+          <div className="space-y-2">
+            <Label>Razão social *</Label>
+            <Input value={razaoSocial} onChange={(e) => setRazaoSocial(e.target.value)} required autoFocus />
+          </div>
+          <div className="space-y-2">
+            <Label>Nome fantasia</Label>
+            <Input value={nomeFantasia} onChange={(e) => setNomeFantasia(e.target.value)} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>CNPJ</Label>
+              <Input value={cnpj} onChange={(e) => setCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
+            </div>
+            <div className="space-y-2">
+              <Label>Telefone</Label>
+              <Input value={telefone} onChange={(e) => setTelefone(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Salvando..." : "Cadastrar"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
