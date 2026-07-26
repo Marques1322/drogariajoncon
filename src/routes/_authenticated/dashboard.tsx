@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PharmacyBadge } from "@/components/ui/pharmacy-badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -29,8 +30,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-const brl = (n: number) =>
-  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function addDays(d: Date, days: number) {
   const c = new Date(d);

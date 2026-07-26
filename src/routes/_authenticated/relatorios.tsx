@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
@@ -52,7 +53,6 @@ const REPORTS: ReportDef[] = [
   { key: "fluxo", title: "Fluxo de caixa", description: "Receitas, despesas e saldo por período.", needsPeriod: true },
 ];
 
-const brl = (n: number) => Number(n ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 async function fetchReport(key: ReportKey, from: string, to: string): Promise<{ headers: string[]; rows: (string | number)[][] }> {
   const fromISO = from ? `${from}T00:00:00` : null;

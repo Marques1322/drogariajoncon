@@ -21,6 +21,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/produtos")({
   head: () => ({
@@ -73,7 +74,6 @@ const emptyForm: FormState = {
   estoque_minimo: "0", localizacao: "", ativo: true,
 };
 
-const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function MedicamentosPage() {
   const qc = useQueryClient();

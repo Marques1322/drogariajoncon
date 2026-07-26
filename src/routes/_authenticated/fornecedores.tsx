@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/fornecedores")({
   head: () => ({
@@ -54,7 +55,6 @@ const empty: FormState = {
   email: "", telefone: "", endereco: "", cidade: "", estado: "", cep: "", ativo: true,
 };
 
-const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function FornecedoresPage() {
   const qc = useQueryClient();
