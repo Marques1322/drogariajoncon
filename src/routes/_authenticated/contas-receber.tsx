@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/contas-receber")({
   head: () => ({
@@ -30,7 +31,6 @@ export const Route = createFileRoute("/_authenticated/contas-receber")({
   component: ContasReceberPage,
 });
 
-const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function ContasReceberPage() {
   const qc = useQueryClient();

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useEffect } from "react";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/contas-pagar")({
   head: () => ({
@@ -31,7 +32,6 @@ export const Route = createFileRoute("/_authenticated/contas-pagar")({
   component: ContasPagarPage,
 });
 
-const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 type Status = "pendente" | "pago" | "atrasado" | "cancelado";
 

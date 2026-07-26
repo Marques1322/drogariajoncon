@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => ({
@@ -58,7 +59,6 @@ const empty: FormState = {
   limite_credito: "0", ativo: true,
 };
 
-const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function ClientesPage() {
   const qc = useQueryClient();
