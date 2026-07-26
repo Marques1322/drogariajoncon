@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Package,
@@ -11,19 +10,32 @@ import {
   LogOut,
   Menu,
   X,
+  Warehouse,
+  Truck,
+  Receipt,
+  CreditCard,
+  BarChart3,
+  Pill,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth, canAccess, type AppRole } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
-const navigationItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  
-  { label: "Vendas", href: "/vendas", icon: ShoppingCart },
-  { label: "Medicamentos", href: "/produtos", icon: Package },
-  { label: "Clientes", href: "/clientes", icon: Users },
-  { label: "Compras", href: "/compras", icon: FileText },
-  { label: "Financeiro", href: "/financeiro", icon: DollarSign },
-  { label: "Relatórios", href: "/relatorios", icon: FileText },
-  { label: "Configurações", href: "/configuracoes", icon: Settings },
+type Item = { label: string; href: string; icon: React.ComponentType<{ className?: string }>; roles: AppRole[] };
+
+const modules: Item[] = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "financeiro", "estoque", "atendente", "gerente"] },
+  { label: "Vendas", href: "/vendas", icon: ShoppingCart, roles: ["admin", "gerente", "atendente"] },
+  { label: "Medicamentos", href: "/produtos", icon: Pill, roles: ["admin", "gerente", "estoque"] },
+  { label: "Estoque", href: "/estoque", icon: Warehouse, roles: ["admin", "gerente", "estoque"] },
+  { label: "Clientes", href: "/clientes", icon: Users, roles: ["admin", "gerente", "atendente"] },
+  { label: "Fornecedores", href: "/fornecedores", icon: Truck, roles: ["admin", "gerente", "estoque"] },
+  { label: "Compras", href: "/compras", icon: Receipt, roles: ["admin", "gerente", "estoque"] },
+  { label: "Contas a Pagar", href: "/contas-pagar", icon: CreditCard, roles: ["admin", "gerente", "financeiro"] },
+  { label: "Contas a Receber", href: "/contas-receber", icon: DollarSign, roles: ["admin", "gerente", "financeiro"] },
+  { label: "Financeiro", href: "/financeiro", icon: BarChart3, roles: ["admin", "gerente", "financeiro"] },
+  { label: "Relatórios", href: "/relatorios", icon: FileText, roles: ["admin", "gerente", "financeiro"] },
+  { label: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin"] },
 ];
 
 interface SidebarProps {
@@ -32,82 +44,117 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
-  const location = useLocation();
+  const currentPath = useRouterState({ select: (r) => r.location.pathname });
+  const { roles } = useAuth();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
 
-  const isActive = (href: string) => {
-    const path = location.pathname;
-    return path === href || path.startsWith(href + "/");
-  };
+  const isActive = (href: string) =>
+    currentPath === href || currentPath.startsWith(href + "/");
+
+  const items = modules.filter((m) => canAccess(m.href, roles));
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-full bg-white border-r border-slate-200 shadow-sm transition-all duration-300 ease-in-out z-40 ${
-        isOpen ? "w-64" : "w-20"
-      }`}
+      className={cn(
+        "fixed left-0 top-0 h-full z-40 flex flex-col",
+        "border-r border-border/60 bg-[#111111] text-white",
+        "shadow-[8px_0_32px_-24px_rgba(0,0,0,0.9)]",
+        "transition-[width] duration-300 ease-in-out",
+        isOpen ? "w-64" : "w-20",
+      )}
     >
-      {/* Logo/Brand com border-l-4 e fundo degradado */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 border-l-4 border-l-blue-600 bg-gradient-to-r from-blue-50 to-transparent">
+      {/* Brand */}
+      <div className="flex h-20 items-center gap-3 border-b border-white/5 px-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl joncon-gradient shadow-lg shadow-orange-500/25">
+          <span className="text-xl font-black text-white">J</span>
+        </div>
         {isOpen && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm">Φ</span>
+          <div className="min-w-0 flex-1 animate-fade-in">
+            <div className="truncate text-sm font-bold tracking-tight text-white">
+              Drogaria Joncon
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-slate-900 text-lg">Drogaria</span>
-              <span className="font-semibold text-teal-600 text-xs">Joncon</span>
+            <div className="truncate text-[11px] font-medium uppercase tracking-widest text-[#F97316]">
+              Gestão farmacêutica
             </div>
           </div>
         )}
         <button
           onClick={() => onToggle(!isOpen)}
-          className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-          title={isOpen ? "Fechar" : "Abrir"}
+          className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+          title={isOpen ? "Recolher" : "Expandir"}
+          aria-label={isOpen ? "Recolher menu" : "Expandir menu"}
         >
-          {isOpen ? (
-            <X className="w-5 h-5 text-slate-600" />
-          ) : (
-            <Menu className="w-5 h-5 text-slate-600" />
-          )}
+          {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-                active
-                  ? "bg-teal-500 text-white shadow-md"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              <Icon className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110`} />
-              {isOpen && (
-                <span className="text-sm font-medium truncate">{item.label}</span>
-              )}
-            </Link>
-          );
-        })}
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        {isOpen && (
+          <div className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            Menu
+          </div>
+        )}
+        <ul className="space-y-1">
+          {items.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  to={item.href}
+                  title={!isOpen ? item.label : undefined}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                    "transition-all duration-200",
+                    active
+                      ? "joncon-gradient text-white shadow-lg shadow-orange-500/30"
+                      : "text-zinc-400 hover:bg-white/5 hover:text-white",
+                  )}
+                >
+                  {active && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl"
+                    >
+                      <span className="absolute inset-0 shine-active" />
+                    </span>
+                  )}
+                  <Icon
+                    className={cn(
+                      "relative h-5 w-5 shrink-0 transition-transform duration-200",
+                      "group-hover:scale-110",
+                      active ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" : "",
+                    )}
+                  />
+                  {isOpen && (
+                    <span className="relative truncate">{item.label}</span>
+                  )}
+                  {active && isOpen && (
+                    <span
+                      aria-hidden
+                      className="relative ml-auto h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+                    />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      {/* Logout Button */}
-      <div className="border-t border-slate-200 p-2">
+      {/* Logout */}
+      <div className="border-t border-white/5 p-3">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
-          title="Sair da aplicação"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-400 transition-all hover:bg-red-500/10 hover:text-red-400"
+          title="Sair"
         >
-          <LogOut className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" />
-          {isOpen && <span className="text-sm font-medium">Sair</span>}
+          <LogOut className="h-5 w-5 shrink-0 transition-transform group-hover:scale-110" />
+          {isOpen && <span>Sair</span>}
         </button>
       </div>
     </aside>
