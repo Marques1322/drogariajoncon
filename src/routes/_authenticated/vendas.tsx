@@ -188,7 +188,7 @@ function NovaVendaDialog({ open, onOpenChange, onDone }: { open: boolean; onOpen
         }));
       if (items.length === 0) throw new Error("Adicione ao menos um item");
 
-      let parcs: any[] = [];
+      const parcs: any[] = [];
       if (modo === "prazo") {
         if (!clienteId) throw new Error("Cliente é obrigatório para vendas a prazo");
         const n = Math.max(1, parseInt(numParcelas, 10) || 1);

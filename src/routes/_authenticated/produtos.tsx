@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -119,7 +119,7 @@ function MedicamentosPage() {
       if (error) throw error;
 
       const ids = (data ?? []).map((m: any) => m.id);
-      let estoques: Record<string, number> = {};
+      const estoques: Record<string, number> = {};
       if (ids.length) {
         const { data: lotesData } = await supabase
           .from("lotes")

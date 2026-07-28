@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  Package,
   ShoppingCart,
   DollarSign,
   Users,

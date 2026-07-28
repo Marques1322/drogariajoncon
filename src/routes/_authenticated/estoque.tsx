@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Warehouse, Plus, ArrowDownToLine, ArrowUpFromLine, Search, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,7 +93,7 @@ function EstoquePage() {
   const lotesQ = useQuery({
     queryKey: ["lotes", search],
     queryFn: async (): Promise<LoteRow[]> => {
-      let q = supabase
+      const q = supabase
         .from("lotes")
         .select("id, numero_lote, validade, quantidade, preco_custo, medicamento:medicamentos(id, nome, estoque_minimo)")
         .order("validade", { ascending: true })
@@ -124,7 +124,7 @@ function EstoquePage() {
       if (error) throw error;
       const rows = (data ?? []) as any[];
       const userIds = Array.from(new Set(rows.map((r) => r.created_by).filter(Boolean))) as string[];
-      let profiles: Record<string, string | null> = {};
+      const profiles: Record<string, string | null> = {};
       if (userIds.length) {
         const { data: profs } = await supabase.from("profiles").select("id, nome_completo").in("id", userIds);
         (profs ?? []).forEach((p: any) => (profiles[p.id] = p.nome_completo));
@@ -210,7 +210,7 @@ function EstoquePage() {
                             </TableCell>
                             <TableCell className="text-right font-medium">{l.quantidade}</TableCell>
                             <TableCell className="text-right text-muted-foreground">
-                              {l.preco_custo != null ? Number(l.preco_custo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—"}
+                              {l.preco_custo != null ? brl(Number(l.preco_custo)) : "—"}
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1 flex-wrap">

@@ -81,7 +81,7 @@ function ClientesPage() {
       const rows = (data ?? []) as Cliente[];
       // saldo devedor (só carrega se usuário tiver acesso a contas_receber)
       const ids = rows.map((c) => c.id);
-      let saldos: Record<string, number> = {};
+      const saldos: Record<string, number> = {};
       if (ids.length) {
         const { data: cr } = await supabase
           .from("contas_receber")

@@ -15,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PharmacyBadge } from "@/components/ui/pharmacy-badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { brl } from "@/lib/format";
@@ -409,9 +408,6 @@ function DashboardPage() {
                 </TableHeader>
                 <TableBody>
                   {expiringData.data?.map((item: any) => {
-                    const daysToExpiry = Math.floor(
-                      (new Date(item.validade).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-                    );
                     return (
                       <TableRow key={item.id} className="border-slate-100 hover:bg-slate-50/50">
                         <TableCell className="text-sm text-slate-900 font-medium">{item.medicamento?.nome}</TableCell>
