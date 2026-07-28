@@ -18,6 +18,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { brl } from "@/lib/format";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
