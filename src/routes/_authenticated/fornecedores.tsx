@@ -7,16 +7,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -27,7 +45,10 @@ export const Route = createFileRoute("/_authenticated/fornecedores")({
   head: () => ({
     meta: [
       { title: "Fornecedores — PharmaERP" },
-      { name: "description", content: "Cadastro de fornecedores, histórico de compras e duplicatas." },
+      {
+        name: "description",
+        content: "Cadastro de fornecedores, histórico de compras e duplicatas.",
+      },
     ],
   }),
   component: FornecedoresPage,
@@ -51,10 +72,18 @@ type Fornecedor = {
 type FormState = Omit<Fornecedor, "id"> & { id?: string };
 
 const empty: FormState = {
-  razao_social: "", nome_fantasia: "", cnpj: "", inscricao_estadual: "",
-  email: "", telefone: "", endereco: "", cidade: "", estado: "", cep: "", ativo: true,
+  razao_social: "",
+  nome_fantasia: "",
+  cnpj: "",
+  inscricao_estadual: "",
+  email: "",
+  telefone: "",
+  endereco: "",
+  cidade: "",
+  estado: "",
+  cep: "",
+  ativo: true,
 };
-
 
 function FornecedoresPage() {
   const qc = useQueryClient();
@@ -70,7 +99,9 @@ function FornecedoresPage() {
       let q = supabase.from("fornecedores").select("*").order("razao_social");
       if (search.trim()) {
         const s = `%${search.trim()}%`;
-        q = q.or(`razao_social.ilike.${s},nome_fantasia.ilike.${s},cnpj.ilike.${s},email.ilike.${s},cidade.ilike.${s}`);
+        q = q.or(
+          `razao_social.ilike.${s},nome_fantasia.ilike.${s},cnpj.ilike.${s},email.ilike.${s},cidade.ilike.${s}`,
+        );
       }
       const { data, error } = await q.limit(200);
       if (error) throw error;
@@ -123,14 +154,23 @@ function FornecedoresPage() {
     onError: (e: any) => toast.error(e.message ?? "Erro. Fornecedor pode ter compras vinculadas."),
   });
 
-  function openNew() { setForm(empty); setDialogOpen(true); }
+  function openNew() {
+    setForm(empty);
+    setDialogOpen(true);
+  }
   function openEdit(f: Fornecedor) {
     setForm({ ...f });
     setDialogOpen(true);
   }
 
   if (selected) {
-    return <FornecedorDetalhe fornecedor={selected} onBack={() => setSelected(null)} onEdit={() => openEdit(selected)} />;
+    return (
+      <FornecedorDetalhe
+        fornecedor={selected}
+        onBack={() => setSelected(null)}
+        onEdit={() => openEdit(selected)}
+      />
+    );
   }
 
   return (
@@ -144,7 +184,9 @@ function FornecedoresPage() {
             Cadastro, contatos, histórico de compras e duplicatas.
           </p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Novo fornecedor</Button>
+        <Button onClick={openNew}>
+          <Plus className="h-4 w-4 mr-1" /> Novo fornecedor
+        </Button>
       </div>
 
       <Card>
@@ -175,14 +217,24 @@ function FornecedoresPage() {
               </TableHeader>
               <TableBody>
                 {listQ.isLoading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Carregando...
+                    </TableCell>
+                  </TableRow>
                 ) : (listQ.data ?? []).length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum fornecedor encontrado.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Nenhum fornecedor encontrado.
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   listQ.data!.map((f) => (
                     <TableRow key={f.id} className="cursor-pointer" onClick={() => setSelected(f)}>
                       <TableCell className="font-medium">{f.razao_social}</TableCell>
-                      <TableCell className="text-muted-foreground">{f.nome_fantasia ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {f.nome_fantasia ?? "—"}
+                      </TableCell>
                       <TableCell className="font-mono text-xs">{f.cnpj ?? "—"}</TableCell>
                       <TableCell className="text-sm">
                         {f.telefone && <div>{f.telefone}</div>}
@@ -190,7 +242,13 @@ function FornecedoresPage() {
                         {!f.telefone && !f.email && "—"}
                       </TableCell>
                       <TableCell>{[f.cidade, f.estado].filter(Boolean).join("/") || "—"}</TableCell>
-                      <TableCell>{f.ativo ? <Badge variant="secondary">Ativo</Badge> : <Badge variant="outline">Inativo</Badge>}</TableCell>
+                      <TableCell>
+                        {f.ativo ? (
+                          <Badge variant="secondary">Ativo</Badge>
+                        ) : (
+                          <Badge variant="outline">Inativo</Badge>
+                        )}
+                      </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1 justify-end">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(f)}>
@@ -207,7 +265,9 @@ function FornecedoresPage() {
               </TableBody>
             </Table>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">Clique numa linha para ver histórico de compras e duplicatas.</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Clique numa linha para ver histórico de compras e duplicatas.
+          </p>
         </CardContent>
       </Card>
 
@@ -217,54 +277,104 @@ function FornecedoresPage() {
             <DialogTitle>{form.id ? "Editar fornecedor" : "Novo fornecedor"}</DialogTitle>
             <DialogDescription>Preencha os dados cadastrais e de contato.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={(e) => { e.preventDefault(); saveMut.mutate(form); }} className="grid gap-4 sm:grid-cols-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveMut.mutate(form);
+            }}
+            className="grid gap-4 sm:grid-cols-2"
+          >
             <div className="space-y-2 sm:col-span-2">
               <Label>Razão social *</Label>
-              <Input required value={form.razao_social} onChange={(e) => setForm({ ...form, razao_social: e.target.value })} />
+              <Input
+                required
+                value={form.razao_social}
+                onChange={(e) => setForm({ ...form, razao_social: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Nome fantasia</Label>
-              <Input value={form.nome_fantasia ?? ""} onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })} />
+              <Input
+                value={form.nome_fantasia ?? ""}
+                onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>CNPJ</Label>
-              <Input value={form.cnpj ?? ""} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} placeholder="00.000.000/0000-00" />
+              <Input
+                value={form.cnpj ?? ""}
+                onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+                placeholder="00.000.000/0000-00"
+              />
             </div>
             <div className="space-y-2">
               <Label>Inscrição estadual</Label>
-              <Input value={form.inscricao_estadual ?? ""} onChange={(e) => setForm({ ...form, inscricao_estadual: e.target.value })} />
+              <Input
+                value={form.inscricao_estadual ?? ""}
+                onChange={(e) => setForm({ ...form, inscricao_estadual: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Telefone</Label>
-              <Input value={form.telefone ?? ""} onChange={(e) => setForm({ ...form, telefone: e.target.value })} />
+              <Input
+                value={form.telefone ?? ""}
+                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>E-mail</Label>
-              <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <Input
+                type="email"
+                value={form.email ?? ""}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Endereço</Label>
-              <Input value={form.endereco ?? ""} onChange={(e) => setForm({ ...form, endereco: e.target.value })} />
+              <Input
+                value={form.endereco ?? ""}
+                onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Cidade</Label>
-              <Input value={form.cidade ?? ""} onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
+              <Input
+                value={form.cidade ?? ""}
+                onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>UF</Label>
-              <Input maxLength={2} value={form.estado ?? ""} onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })} />
+              <Input
+                maxLength={2}
+                value={form.estado ?? ""}
+                onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
+              />
             </div>
             <div className="space-y-2">
               <Label>CEP</Label>
-              <Input value={form.cep ?? ""} onChange={(e) => setForm({ ...form, cep: e.target.value })} />
+              <Input
+                value={form.cep ?? ""}
+                onChange={(e) => setForm({ ...form, cep: e.target.value })}
+              />
             </div>
             <div className="flex items-center gap-2 sm:col-span-2 pt-2">
-              <Switch id="ativo" checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} />
-              <Label htmlFor="ativo" className="cursor-pointer">Fornecedor ativo</Label>
+              <Switch
+                id="ativo"
+                checked={form.ativo}
+                onCheckedChange={(v) => setForm({ ...form, ativo: v })}
+              />
+              <Label htmlFor="ativo" className="cursor-pointer">
+                Fornecedor ativo
+              </Label>
             </div>
             <DialogFooter className="sm:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saveMut.isPending}>{saveMut.isPending ? "Salvando..." : "Salvar"}</Button>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saveMut.isPending}>
+                {saveMut.isPending ? "Salvando..." : "Salvar"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -275,12 +385,15 @@ function FornecedoresPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir fornecedor?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se houver compras vinculadas a operação será bloqueada. Prefira desativar para preservar histórico.
+              Se houver compras vinculadas a operação será bloqueada. Prefira desativar para
+              preservar histórico.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && deleteMut.mutate(deleteId)}>Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteId && deleteMut.mutate(deleteId)}>
+              Excluir
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -289,8 +402,14 @@ function FornecedoresPage() {
 }
 
 function FornecedorDetalhe({
-  fornecedor, onBack, onEdit,
-}: { fornecedor: Fornecedor; onBack: () => void; onEdit: () => void }) {
+  fornecedor,
+  onBack,
+  onEdit,
+}: {
+  fornecedor: Fornecedor;
+  onBack: () => void;
+  onEdit: () => void;
+}) {
   const comprasQ = useQuery({
     queryKey: ["fornecedor-compras", fornecedor.id],
     queryFn: async () => {
@@ -324,41 +443,58 @@ function FornecedorDetalhe({
     [comprasQ.data],
   );
   const emAberto = useMemo(
-    () => (duplicatasQ.data ?? [])
-      .filter((d: any) => d.status !== "pago" && d.status !== "cancelado")
-      .reduce((s: number, d: any) => s + (Number(d.valor) - Number(d.valor_pago ?? 0)), 0),
+    () =>
+      (duplicatasQ.data ?? [])
+        .filter((d: any) => d.status !== "pago" && d.status !== "cancelado")
+        .reduce((s: number, d: any) => s + (Number(d.valor) - Number(d.valor_pago ?? 0)), 0),
     [duplicatasQ.data],
   );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold tracking-tight">{fornecedor.razao_social}</h1>
           <p className="text-sm text-muted-foreground">
             {fornecedor.nome_fantasia ?? "—"} • {fornecedor.cnpj ?? "sem CNPJ"}
           </p>
         </div>
-        <Button variant="outline" onClick={onEdit}><Pencil className="h-4 w-4 mr-1" /> Editar</Button>
+        <Button variant="outline" onClick={onEdit}>
+          <Pencil className="h-4 w-4 mr-1" /> Editar
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total comprado</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-semibold">{brl(totalComprado)}</p></CardContent>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Total comprado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">{brl(totalComprado)}</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Duplicatas em aberto</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-semibold text-amber-600">{brl(emAberto)}</p></CardContent>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Duplicatas em aberto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold text-amber-600">{brl(emAberto)}</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Contato</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Contato</CardTitle>
+          </CardHeader>
           <CardContent className="text-sm">
             <p>{fornecedor.telefone ?? "—"}</p>
             <p className="text-muted-foreground">{fornecedor.email ?? "—"}</p>
             <p className="text-muted-foreground">
-              {[fornecedor.endereco, fornecedor.cidade, fornecedor.estado].filter(Boolean).join(", ") || "Sem endereço"}
+              {[fornecedor.endereco, fornecedor.cidade, fornecedor.estado]
+                .filter(Boolean)
+                .join(", ") || "Sem endereço"}
             </p>
           </CardContent>
         </Card>
@@ -366,8 +502,12 @@ function FornecedorDetalhe({
 
       <Tabs defaultValue="compras">
         <TabsList>
-          <TabsTrigger value="compras"><Receipt className="h-4 w-4 mr-1" /> Compras</TabsTrigger>
-          <TabsTrigger value="duplicatas"><FileText className="h-4 w-4 mr-1" /> Duplicatas</TabsTrigger>
+          <TabsTrigger value="compras">
+            <Receipt className="h-4 w-4 mr-1" /> Compras
+          </TabsTrigger>
+          <TabsTrigger value="duplicatas">
+            <FileText className="h-4 w-4 mr-1" /> Duplicatas
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="compras">
           <Card>
@@ -383,15 +523,29 @@ function FornecedorDetalhe({
                 </TableHeader>
                 <TableBody>
                   {(comprasQ.data ?? []).length === 0 ? (
-                    <TableRow><TableCell colSpan={4} className="text-center py-6 text-muted-foreground">Sem compras registradas.</TableCell></TableRow>
-                  ) : comprasQ.data!.map((c: any) => (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-mono text-xs">{c.numero_nota ?? "—"}</TableCell>
-                      <TableCell>{c.data_emissao ? format(new Date(c.data_emissao), "dd/MM/yyyy", { locale: ptBR }) : "—"}</TableCell>
-                      <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
-                      <TableCell className="text-right font-medium">{brl(Number(c.valor_total ?? 0))}</TableCell>
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                        Sem compras registradas.
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    comprasQ.data!.map((c: any) => (
+                      <TableRow key={c.id}>
+                        <TableCell className="font-mono text-xs">{c.numero_nota ?? "—"}</TableCell>
+                        <TableCell>
+                          {c.data_emissao
+                            ? format(new Date(c.data_emissao), "dd/MM/yyyy", { locale: ptBR })
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{c.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {brl(Number(c.valor_total ?? 0))}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -413,20 +567,46 @@ function FornecedorDetalhe({
                 </TableHeader>
                 <TableBody>
                   {(duplicatasQ.data ?? []).length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">Sem duplicatas vinculadas.</TableCell></TableRow>
-                  ) : duplicatasQ.data!.map((d: any) => {
-                    const saldo = Number(d.valor) - Number(d.valor_pago ?? 0);
-                    return (
-                      <TableRow key={d.id}>
-                        <TableCell>{d.descricao}</TableCell>
-                        <TableCell className="font-mono text-xs">{d.numero_documento ?? "—"}</TableCell>
-                        <TableCell>{format(new Date(d.data_vencimento), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
-                        <TableCell><Badge variant={d.status === "pago" ? "secondary" : d.status === "atrasado" ? "destructive" : "outline"}>{d.status}</Badge></TableCell>
-                        <TableCell className="text-right">{brl(Number(d.valor))}</TableCell>
-                        <TableCell className={`text-right font-medium ${saldo > 0 ? "text-amber-600" : ""}`}>{brl(saldo)}</TableCell>
-                      </TableRow>
-                    );
-                  })}
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                        Sem duplicatas vinculadas.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    duplicatasQ.data!.map((d: any) => {
+                      const saldo = Number(d.valor) - Number(d.valor_pago ?? 0);
+                      return (
+                        <TableRow key={d.id}>
+                          <TableCell>{d.descricao}</TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {d.numero_documento ?? "—"}
+                          </TableCell>
+                          <TableCell>
+                            {format(new Date(d.data_vencimento), "dd/MM/yyyy", { locale: ptBR })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                d.status === "pago"
+                                  ? "secondary"
+                                  : d.status === "atrasado"
+                                    ? "destructive"
+                                    : "outline"
+                              }
+                            >
+                              {d.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">{brl(Number(d.valor))}</TableCell>
+                          <TableCell
+                            className={`text-right font-medium ${saldo > 0 ? "text-amber-600" : ""}`}
+                          >
+                            {brl(saldo)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

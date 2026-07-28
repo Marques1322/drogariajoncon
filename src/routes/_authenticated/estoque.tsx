@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Warehouse, Plus, ArrowDownToLine, ArrowUpFromLine, Search, AlertTriangle } from "lucide-react";
+import {
+  Warehouse,
+  Plus,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Search,
+  AlertTriangle,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +17,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
@@ -96,7 +119,9 @@ function EstoquePage() {
     queryFn: async (): Promise<LoteRow[]> => {
       const q = supabase
         .from("lotes")
-        .select("id, numero_lote, validade, quantidade, preco_custo, medicamento:medicamentos(id, nome, estoque_minimo)")
+        .select(
+          "id, numero_lote, validade, quantidade, preco_custo, medicamento:medicamentos(id, nome, estoque_minimo)",
+        )
         .order("validade", { ascending: true })
         .limit(200);
       const { data, error } = await q;
@@ -124,10 +149,15 @@ function EstoquePage() {
         .limit(200);
       if (error) throw error;
       const rows = (data ?? []) as any[];
-      const userIds = Array.from(new Set(rows.map((r) => r.created_by).filter(Boolean))) as string[];
+      const userIds = Array.from(
+        new Set(rows.map((r) => r.created_by).filter(Boolean)),
+      ) as string[];
       const profiles: Record<string, string | null> = {};
       if (userIds.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, nome_completo").in("id", userIds);
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, nome_completo")
+          .in("id", userIds);
         (profs ?? []).forEach((p: any) => (profiles[p.id] = p.nome_completo));
       }
       return rows.map((r) => ({
@@ -192,19 +222,31 @@ function EstoquePage() {
                   </TableHeader>
                   <TableBody>
                     {lotesQ.isLoading ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          Carregando...
+                        </TableCell>
+                      </TableRow>
                     ) : (lotesQ.data ?? []).length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum lote encontrado.</TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          Nenhum lote encontrado.
+                        </TableCell>
+                      </TableRow>
                     ) : (
                       lotesQ.data!.map((l) => {
                         const validade = new Date(l.validade);
-                        const dias = Math.floor((validade.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                        const dias = Math.floor(
+                          (validade.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                        );
                         const vencido = dias < 0;
                         const vencendo = !vencido && dias <= 60;
                         const baixo = l.medicamento && l.quantidade < l.medicamento.estoque_minimo;
                         return (
                           <TableRow key={l.id}>
-                            <TableCell className="font-medium">{l.medicamento?.nome ?? "—"}</TableCell>
+                            <TableCell className="font-medium">
+                              {l.medicamento?.nome ?? "—"}
+                            </TableCell>
                             <TableCell className="font-mono text-xs">{l.numero_lote}</TableCell>
                             <TableCell>
                               {format(validade, "dd/MM/yyyy", { locale: ptBR })}
@@ -216,13 +258,22 @@ function EstoquePage() {
                             <TableCell>
                               <div className="flex gap-1 flex-wrap">
                                 {vencido && <Badge variant="destructive">Vencido</Badge>}
-                                {vencendo && <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Vence em {dias}d</Badge>}
+                                {vencendo && (
+                                  <Badge className="bg-amber-500 hover:bg-amber-500 text-white">
+                                    Vence em {dias}d
+                                  </Badge>
+                                )}
                                 {baixo && (
-                                  <Badge variant="outline" className="border-amber-500 text-amber-600">
+                                  <Badge
+                                    variant="outline"
+                                    className="border-amber-500 text-amber-600"
+                                  >
                                     <AlertTriangle className="h-3 w-3 mr-1" /> Estoque baixo
                                   </Badge>
                                 )}
-                                {!vencido && !vencendo && !baixo && <Badge variant="secondary">OK</Badge>}
+                                {!vencido && !vencendo && !baixo && (
+                                  <Badge variant="secondary">OK</Badge>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -238,7 +289,9 @@ function EstoquePage() {
 
         <TabsContent value="movimentacoes">
           <Card>
-            <CardHeader><CardTitle className="text-base">Últimas movimentações</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">Últimas movimentações</CardTitle>
+            </CardHeader>
             <CardContent>
               <div className="rounded-md border overflow-x-auto">
                 <Table>
@@ -255,25 +308,44 @@ function EstoquePage() {
                   </TableHeader>
                   <TableBody>
                     {movsQ.isLoading ? (
-                      <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          Carregando...
+                        </TableCell>
+                      </TableRow>
                     ) : (movsQ.data ?? []).length === 0 ? (
-                      <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma movimentação registrada.</TableCell></TableRow>
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          Nenhuma movimentação registrada.
+                        </TableCell>
+                      </TableRow>
                     ) : (
                       movsQ.data!.map((m) => (
                         <TableRow key={m.id}>
                           <TableCell className="text-sm">
-                            {format(new Date(m.data_movimento), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                            {format(new Date(m.data_movimento), "dd/MM/yyyy HH:mm", {
+                              locale: ptBR,
+                            })}
                           </TableCell>
                           <TableCell>
                             <Badge variant={TIPO_VARIANT[m.tipo]}>{TIPO_LABEL[m.tipo]}</Badge>
                           </TableCell>
                           <TableCell>{m.medicamento?.nome ?? "—"}</TableCell>
-                          <TableCell className="font-mono text-xs">{m.lote?.numero_lote ?? "—"}</TableCell>
-                          <TableCell className={`text-right font-medium ${m.quantidade >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                            {m.quantidade > 0 ? "+" : ""}{m.quantidade}
+                          <TableCell className="font-mono text-xs">
+                            {m.lote?.numero_lote ?? "—"}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{m.profile?.nome_completo ?? "—"}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground max-w-xs truncate">{m.observacao ?? "—"}</TableCell>
+                          <TableCell
+                            className={`text-right font-medium ${m.quantidade >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                          >
+                            {m.quantidade > 0 ? "+" : ""}
+                            {m.quantidade}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {m.profile?.nome_completo ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                            {m.observacao ?? "—"}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -305,7 +377,10 @@ function EstoquePage() {
 }
 
 function NovaMovimentacaoDialog({
-  open, onOpenChange, meds, onDone,
+  open,
+  onOpenChange,
+  meds,
+  onDone,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -320,8 +395,12 @@ function NovaMovimentacaoDialog({
   const [formError, setFormError] = useState<string | null>(null);
 
   const resetForm = () => {
-    setMedicamentoId(""); setLoteId(""); setQuantidade(""); setObservacao("");
-    setTipo("entrada"); setFormError(null);
+    setMedicamentoId("");
+    setLoteId("");
+    setQuantidade("");
+    setObservacao("");
+    setTipo("entrada");
+    setFormError(null);
   };
 
   const lotesQ = useQuery({
@@ -342,7 +421,13 @@ function NovaMovimentacaoDialog({
     if (!e) return "Erro desconhecido ao registrar movimentação.";
     if (typeof e === "string") return e;
     const anyE = e as any;
-    return anyE.message || anyE.error_description || anyE.details || anyE.hint || "Erro ao registrar movimentação.";
+    return (
+      anyE.message ||
+      anyE.error_description ||
+      anyE.details ||
+      anyE.hint ||
+      "Erro ao registrar movimentação."
+    );
   };
 
   const mut = useMutation({
@@ -350,8 +435,10 @@ function NovaMovimentacaoDialog({
       const qtd = parseInt(quantidade, 10);
       if (!medicamentoId) throw new Error("Selecione o medicamento.");
       if (!loteId) throw new Error("Selecione o lote.");
-      if (Number.isNaN(qtd) || qtd === 0) throw new Error("Informe uma quantidade válida (diferente de zero).");
-      if (tipo !== "ajuste" && qtd < 0) throw new Error("Quantidade deve ser positiva para este tipo de movimentação.");
+      if (Number.isNaN(qtd) || qtd === 0)
+        throw new Error("Informe uma quantidade válida (diferente de zero).");
+      if (tipo !== "ajuste" && qtd < 0)
+        throw new Error("Quantidade deve ser positiva para este tipo de movimentação.");
       const { error } = await supabase.rpc("registrar_movimentacao_estoque", {
         p_medicamento_id: medicamentoId,
         p_lote_id: loteId,
@@ -385,12 +472,21 @@ function NovaMovimentacaoDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) { resetForm(); } onOpenChange(o); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) {
+          resetForm();
+        }
+        onOpenChange(o);
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Nova movimentação</DialogTitle>
           <DialogDescription>
-            Registre entrada, saída, perda, devolução ou ajuste. O estoque do lote é atualizado automaticamente.
+            Registre entrada, saída, perda, devolução ou ajuste. O estoque do lote é atualizado
+            automaticamente.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="grid gap-4">
@@ -402,10 +498,18 @@ function NovaMovimentacaoDialog({
           <div className="space-y-2">
             <Label>Tipo</Label>
             <Select value={tipo} onValueChange={(v) => setTipo(v as MovTipo)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="entrada"><ArrowDownToLine className="h-4 w-4 inline mr-2" />Entrada</SelectItem>
-                <SelectItem value="saida"><ArrowUpFromLine className="h-4 w-4 inline mr-2" />Saída</SelectItem>
+                <SelectItem value="entrada">
+                  <ArrowDownToLine className="h-4 w-4 inline mr-2" />
+                  Entrada
+                </SelectItem>
+                <SelectItem value="saida">
+                  <ArrowUpFromLine className="h-4 w-4 inline mr-2" />
+                  Saída
+                </SelectItem>
                 <SelectItem value="devolucao">Devolução</SelectItem>
                 <SelectItem value="perda">Perda / vencido</SelectItem>
                 <SelectItem value="ajuste">Ajuste (informe positivo ou negativo)</SelectItem>
@@ -414,10 +518,22 @@ function NovaMovimentacaoDialog({
           </div>
           <div className="space-y-2">
             <Label>Medicamento *</Label>
-            <Select value={medicamentoId} onValueChange={(v) => { setMedicamentoId(v); setLoteId(""); }}>
-              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <Select
+              value={medicamentoId}
+              onValueChange={(v) => {
+                setMedicamentoId(v);
+                setLoteId("");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
               <SelectContent>
-                {meds.map((m) => <SelectItem key={m.id} value={m.id}>{m.nome}</SelectItem>)}
+                {meds.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -425,16 +541,23 @@ function NovaMovimentacaoDialog({
             <Label>Lote *</Label>
             <Select value={loteId} onValueChange={setLoteId} disabled={!medicamentoId}>
               <SelectTrigger>
-                <SelectValue placeholder={medicamentoId ? "Selecione um lote..." : "Escolha o medicamento antes"} />
+                <SelectValue
+                  placeholder={
+                    medicamentoId ? "Selecione um lote..." : "Escolha o medicamento antes"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {(lotesQ.data ?? []).map((l: any) => (
                   <SelectItem key={l.id} value={l.id}>
-                    {l.numero_lote} — val. {format(new Date(l.validade), "dd/MM/yyyy")} — saldo {l.quantidade}
+                    {l.numero_lote} — val. {format(new Date(l.validade), "dd/MM/yyyy")} — saldo{" "}
+                    {l.quantidade}
                   </SelectItem>
                 ))}
                 {(lotesQ.data ?? []).length === 0 && medicamentoId && !lotesQ.isLoading && (
-                  <div className="px-2 py-1.5 text-xs text-muted-foreground">Nenhum lote cadastrado. Crie um lote primeiro.</div>
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                    Nenhum lote cadastrado. Crie um lote primeiro.
+                  </div>
                 )}
               </SelectContent>
             </Select>
@@ -443,7 +566,9 @@ function NovaMovimentacaoDialog({
             <Label>Quantidade *</Label>
             <Input
               type="number"
-              placeholder={tipo === "ajuste" ? "Ex.: -5 para reduzir, 10 para aumentar" : "Qtd. positiva"}
+              placeholder={
+                tipo === "ajuste" ? "Ex.: -5 para reduzir, 10 para aumentar" : "Qtd. positiva"
+              }
               value={quantidade}
               onChange={(e) => setQuantidade(e.target.value)}
               required
@@ -454,8 +579,19 @@ function NovaMovimentacaoDialog({
             <Textarea rows={2} value={observacao} onChange={(e) => setObservacao(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }}>Cancelar</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Registrando..." : "Registrar"}</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                resetForm();
+                onOpenChange(false);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Registrando..." : "Registrar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -464,7 +600,10 @@ function NovaMovimentacaoDialog({
 }
 
 function NovoLoteDialog({
-  open, onOpenChange, meds, onDone,
+  open,
+  onOpenChange,
+  meds,
+  onDone,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -479,7 +618,8 @@ function NovoLoteDialog({
 
   const mut = useMutation({
     mutationFn: async () => {
-      if (!medicamentoId || !numeroLote.trim() || !validade) throw new Error("Preencha medicamento, lote e validade");
+      if (!medicamentoId || !numeroLote.trim() || !validade)
+        throw new Error("Preencha medicamento, lote e validade");
       const { error } = await supabase.from("lotes").insert({
         medicamento_id: medicamentoId,
         numero_lote: numeroLote.trim(),
@@ -491,7 +631,11 @@ function NovoLoteDialog({
     },
     onSuccess: () => {
       toast.success("Lote criado.");
-      setMedicamentoId(""); setNumeroLote(""); setValidade(""); setQuantidade("0"); setPrecoCusto("");
+      setMedicamentoId("");
+      setNumeroLote("");
+      setValidade("");
+      setQuantidade("0");
+      setPrecoCusto("");
       onOpenChange(false);
       onDone();
     },
@@ -503,15 +647,29 @@ function NovoLoteDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Novo lote</DialogTitle>
-          <DialogDescription>Cadastre um lote antes de registrar entradas ou saídas.</DialogDescription>
+          <DialogDescription>
+            Cadastre um lote antes de registrar entradas ou saídas.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => { e.preventDefault(); mut.mutate(); }} className="grid gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mut.mutate();
+          }}
+          className="grid gap-4"
+        >
           <div className="space-y-2">
             <Label>Medicamento *</Label>
             <Select value={medicamentoId} onValueChange={setMedicamentoId}>
-              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
               <SelectContent>
-                {meds.map((m) => <SelectItem key={m.id} value={m.id}>{m.nome}</SelectItem>)}
+                {meds.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -526,16 +684,31 @@ function NovoLoteDialog({
             </div>
             <div className="space-y-2">
               <Label>Quantidade inicial</Label>
-              <Input type="number" min="0" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} />
+              <Input
+                type="number"
+                min="0"
+                value={quantidade}
+                onChange={(e) => setQuantidade(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Preço de custo</Label>
-              <Input type="number" step="0.01" min="0" value={precoCusto} onChange={(e) => setPrecoCusto(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={precoCusto}
+                onChange={(e) => setPrecoCusto(e.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={mut.isPending}>{mut.isPending ? "Salvando..." : "Criar lote"}</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Salvando..." : "Criar lote"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

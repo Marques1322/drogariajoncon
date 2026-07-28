@@ -5,8 +5,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ROLE_LABELS, type AppRole } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -70,7 +83,11 @@ function UsuariosPage() {
   }
 
   async function removeRole(userId: string, role: AppRole) {
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("role", role);
     if (error) return toast.error(error.message);
     toast.success("Permissão removida.");
     reload();
@@ -80,7 +97,9 @@ function UsuariosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Usuários e permissões</h1>
-        <p className="text-sm text-muted-foreground">Gerencie os perfis de acesso de cada usuário do sistema.</p>
+        <p className="text-sm text-muted-foreground">
+          Gerencie os perfis de acesso de cada usuário do sistema.
+        </p>
       </div>
 
       <Card>
@@ -131,15 +150,24 @@ function UsuariosPage() {
                           <span className="text-xs text-muted-foreground">—</span>
                         ) : addFor === row.user_id ? (
                           <div className="flex gap-2">
-                            <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as AppRole)}>
-                              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                            <Select
+                              value={selectedRole}
+                              onValueChange={(v) => setSelectedRole(v as AppRole)}
+                            >
+                              <SelectTrigger className="h-8">
+                                <SelectValue />
+                              </SelectTrigger>
                               <SelectContent>
                                 {available.map((r) => (
-                                  <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                                  <SelectItem key={r} value={r}>
+                                    {ROLE_LABELS[r]}
+                                  </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Button size="sm" onClick={() => addRole(row.user_id, selectedRole)}>OK</Button>
+                            <Button size="sm" onClick={() => addRole(row.user_id, selectedRole)}>
+                              OK
+                            </Button>
                           </div>
                         ) : (
                           <Button

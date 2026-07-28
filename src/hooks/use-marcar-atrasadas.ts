@@ -15,16 +15,14 @@ export function useMarcarContasAtrasadas(queryKey: string) {
   useEffect(() => {
     let cancelled = false;
 
-    supabase
-      .rpc("marcar_contas_atrasadas")
-      .then(({ error }) => {
-        if (cancelled) return;
-        if (error) {
-          console.error("Falha ao atualizar contas atrasadas:", error.message);
-          return;
-        }
-        qc.invalidateQueries({ queryKey: [queryKey] });
-      });
+    supabase.rpc("marcar_contas_atrasadas").then(({ error }) => {
+      if (cancelled) return;
+      if (error) {
+        console.error("Falha ao atualizar contas atrasadas:", error.message);
+        return;
+      }
+      qc.invalidateQueries({ queryKey: [queryKey] });
+    });
 
     return () => {
       cancelled = true;

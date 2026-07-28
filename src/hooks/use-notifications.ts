@@ -19,16 +19,41 @@ export function useNotifications() {
       await supabase.rpc("marcar_contas_atrasadas");
 
       const hoje = new Date();
-      const em30 = new Date(); em30.setDate(em30.getDate() + 30);
-      const em60 = new Date(); em60.setDate(em60.getDate() + 60);
-      const em7 = new Date(); em7.setDate(em7.getDate() + 7);
+      const em30 = new Date();
+      em30.setDate(em30.getDate() + 30);
+      const em60 = new Date();
+      em60.setDate(em60.getDate() + 60);
+      const em7 = new Date();
+      em7.setDate(em7.getDate() + 7);
       const iso = (d: Date) => d.toISOString().slice(0, 10);
 
       const [lotes, meds, cp, cr] = await Promise.all([
-        supabase.from("lotes").select("id, numero_lote, validade, quantidade, medicamento:medicamentos(nome)").gt("quantidade", 0).lte("validade", iso(em60)).order("validade").limit(20),
-        supabase.from("medicamentos").select("id, nome, estoque_minimo, lotes(quantidade)").eq("ativo", true).limit(500),
-        supabase.from("contas_pagar").select("id, descricao, valor, data_vencimento, status").in("status", ["pendente", "atrasado"]).lte("data_vencimento", iso(em7)).order("data_vencimento").limit(20),
-        supabase.from("contas_receber").select("id, descricao, valor, data_vencimento, status").in("status", ["pendente", "atrasado"]).lte("data_vencimento", iso(em7)).order("data_vencimento").limit(20),
+        supabase
+          .from("lotes")
+          .select("id, numero_lote, validade, quantidade, medicamento:medicamentos(nome)")
+          .gt("quantidade", 0)
+          .lte("validade", iso(em60))
+          .order("validade")
+          .limit(20),
+        supabase
+          .from("medicamentos")
+          .select("id, nome, estoque_minimo, lotes(quantidade)")
+          .eq("ativo", true)
+          .limit(500),
+        supabase
+          .from("contas_pagar")
+          .select("id, descricao, valor, data_vencimento, status")
+          .in("status", ["pendente", "atrasado"])
+          .lte("data_vencimento", iso(em7))
+          .order("data_vencimento")
+          .limit(20),
+        supabase
+          .from("contas_receber")
+          .select("id, descricao, valor, data_vencimento, status")
+          .in("status", ["pendente", "atrasado"])
+          .lte("data_vencimento", iso(em7))
+          .order("data_vencimento")
+          .limit(20),
       ]);
 
       const out: Notificacao[] = [];

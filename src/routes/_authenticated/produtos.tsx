@@ -7,18 +7,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
@@ -69,11 +91,18 @@ type FormState = {
 };
 
 const emptyForm: FormState = {
-  codigo_interno: "", codigo_barras: "", nome: "", principio_ativo: "",
-  fabricante: "", categoria_id: "", preco_custo: "0", preco_venda: "0",
-  estoque_minimo: "0", localizacao: "", ativo: true,
+  codigo_interno: "",
+  codigo_barras: "",
+  nome: "",
+  principio_ativo: "",
+  fabricante: "",
+  categoria_id: "",
+  preco_custo: "0",
+  preco_venda: "0",
+  estoque_minimo: "0",
+  localizacao: "",
+  ativo: true,
 };
-
 
 function MedicamentosPage() {
   const qc = useQueryClient();
@@ -107,7 +136,9 @@ function MedicamentosPage() {
 
       if (search.trim()) {
         const s = `%${search.trim()}%`;
-        q = q.or(`nome.ilike.${s},principio_ativo.ilike.${s},codigo_barras.ilike.${s},codigo_interno.ilike.${s}`);
+        q = q.or(
+          `nome.ilike.${s},principio_ativo.ilike.${s},codigo_barras.ilike.${s},codigo_interno.ilike.${s}`,
+        );
       }
       if (categoriaFilter !== "all") q = q.eq("categoria_id", categoriaFilter);
       if (ativoFilter === "ativos") q = q.eq("ativo", true);
@@ -126,7 +157,8 @@ function MedicamentosPage() {
           .select("medicamento_id, quantidade")
           .in("medicamento_id", ids);
         (lotesData ?? []).forEach((l: any) => {
-          estoques[l.medicamento_id] = (estoques[l.medicamento_id] ?? 0) + Number(l.quantidade ?? 0);
+          estoques[l.medicamento_id] =
+            (estoques[l.medicamento_id] ?? 0) + Number(l.quantidade ?? 0);
         });
       }
       const rows: Medicamento[] = (data ?? []).map((m: any) => ({
@@ -216,9 +248,13 @@ function MedicamentosPage() {
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <Package className="h-6 w-6" /> Medicamentos
           </h1>
-          <p className="text-sm text-muted-foreground">Cadastro completo de produtos da farmácia.</p>
+          <p className="text-sm text-muted-foreground">
+            Cadastro completo de produtos da farmácia.
+          </p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Novo medicamento</Button>
+        <Button onClick={openNew}>
+          <Plus className="h-4 w-4 mr-1" /> Novo medicamento
+        </Button>
       </div>
 
       <Card>
@@ -230,20 +266,41 @@ function MedicamentosPage() {
                 placeholder="Buscar por nome, princípio ativo, código..."
                 className="pl-9"
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(0);
+                }}
               />
             </div>
-            <Select value={categoriaFilter} onValueChange={(v) => { setCategoriaFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-full lg:w-56"><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <Select
+              value={categoriaFilter}
+              onValueChange={(v) => {
+                setCategoriaFilter(v);
+                setPage(0);
+              }}
+            >
+              <SelectTrigger className="w-full lg:w-56">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas categorias</SelectItem>
                 {(categoriasQ.data ?? []).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nome}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={ativoFilter} onValueChange={(v) => { setAtivoFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-full lg:w-40"><SelectValue /></SelectTrigger>
+            <Select
+              value={ativoFilter}
+              onValueChange={(v) => {
+                setAtivoFilter(v);
+                setPage(0);
+              }}
+            >
+              <SelectTrigger className="w-full lg:w-40">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="ativos">Ativos</SelectItem>
@@ -271,31 +328,52 @@ function MedicamentosPage() {
               </TableHeader>
               <TableBody>
                 {listQ.isLoading ? (
-                  <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                      Carregando...
+                    </TableCell>
+                  </TableRow>
                 ) : (listQ.data?.rows ?? []).length === 0 ? (
-                  <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Nenhum medicamento encontrado.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                      Nenhum medicamento encontrado.
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   listQ.data!.rows.map((m) => {
                     const abaixo = (m.quantidade_atual ?? 0) < m.estoque_minimo;
                     return (
                       <TableRow key={m.id}>
-                        <TableCell className="font-mono text-xs">{m.codigo_interno ?? m.codigo_barras ?? "—"}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {m.codigo_interno ?? m.codigo_barras ?? "—"}
+                        </TableCell>
                         <TableCell className="font-medium">{m.nome}</TableCell>
-                        <TableCell className="text-muted-foreground">{m.principio_ativo ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {m.principio_ativo ?? "—"}
+                        </TableCell>
                         <TableCell>{m.categoria?.nome ?? "—"}</TableCell>
                         <TableCell className="text-right">
                           <span className={abaixo ? "text-amber-600 font-semibold" : ""}>
                             {m.quantidade_atual ?? 0}
                           </span>
-                          <span className="text-xs text-muted-foreground"> / mín {m.estoque_minimo}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {" "}
+                            / mín {m.estoque_minimo}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right">{brl(Number(m.preco_custo))}</TableCell>
-                        <TableCell className="text-right font-medium">{brl(Number(m.preco_venda))}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{m.localizacao ?? "—"}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {brl(Number(m.preco_venda))}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {m.localizacao ?? "—"}
+                        </TableCell>
                         <TableCell>
-                          {m.ativo
-                            ? <Badge variant="secondary">Ativo</Badge>
-                            : <Badge variant="outline">Inativo</Badge>}
+                          {m.ativo ? (
+                            <Badge variant="secondary">Ativo</Badge>
+                          ) : (
+                            <Badge variant="outline">Inativo</Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1 justify-end">
@@ -316,13 +394,27 @@ function MedicamentosPage() {
           </div>
 
           <div className="flex items-center justify-between mt-4 text-sm">
-            <span className="text-muted-foreground">
-              {listQ.data?.count ?? 0} registro(s)
-            </span>
+            <span className="text-muted-foreground">{listQ.data?.count ?? 0} registro(s)</span>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Anterior</Button>
-              <span className="text-muted-foreground">Página {page + 1} de {totalPages}</span>
-              <Button variant="outline" size="sm" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Próxima</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Anterior
+              </Button>
+              <span className="text-muted-foreground">
+                Página {page + 1} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page + 1 >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Próxima
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -333,68 +425,126 @@ function MedicamentosPage() {
           <DialogHeader>
             <DialogTitle>{form.id ? "Editar medicamento" : "Novo medicamento"}</DialogTitle>
             <DialogDescription>
-              Preencha os dados do produto. Lotes, validade e movimentação de estoque são gerenciados no módulo de Estoque.
+              Preencha os dados do produto. Lotes, validade e movimentação de estoque são
+              gerenciados no módulo de Estoque.
             </DialogDescription>
           </DialogHeader>
           <form
-            onSubmit={(e) => { e.preventDefault(); saveMut.mutate(form); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveMut.mutate(form);
+            }}
             className="grid gap-4 sm:grid-cols-2"
           >
             <div className="space-y-2">
               <Label>Código interno</Label>
-              <Input value={form.codigo_interno} onChange={(e) => setForm({ ...form, codigo_interno: e.target.value })} />
+              <Input
+                value={form.codigo_interno}
+                onChange={(e) => setForm({ ...form, codigo_interno: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Código de barras</Label>
-              <Input value={form.codigo_barras} onChange={(e) => setForm({ ...form, codigo_barras: e.target.value })} />
+              <Input
+                value={form.codigo_barras}
+                onChange={(e) => setForm({ ...form, codigo_barras: e.target.value })}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Nome *</Label>
-              <Input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
+              <Input
+                required
+                value={form.nome}
+                onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Princípio ativo</Label>
-              <Input value={form.principio_ativo} onChange={(e) => setForm({ ...form, principio_ativo: e.target.value })} />
+              <Input
+                value={form.principio_ativo}
+                onChange={(e) => setForm({ ...form, principio_ativo: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Fabricante</Label>
-              <Input value={form.fabricante} onChange={(e) => setForm({ ...form, fabricante: e.target.value })} />
+              <Input
+                value={form.fabricante}
+                onChange={(e) => setForm({ ...form, fabricante: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={form.categoria_id || "none"} onValueChange={(v) => setForm({ ...form, categoria_id: v === "none" ? "" : v })}>
-                <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+              <Select
+                value={form.categoria_id || "none"}
+                onValueChange={(v) => setForm({ ...form, categoria_id: v === "none" ? "" : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar..." />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sem categoria</SelectItem>
                   {(categoriasQ.data ?? []).map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nome}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Localização no estoque</Label>
-              <Input placeholder="Ex.: Prateleira A3" value={form.localizacao} onChange={(e) => setForm({ ...form, localizacao: e.target.value })} />
+              <Input
+                placeholder="Ex.: Prateleira A3"
+                value={form.localizacao}
+                onChange={(e) => setForm({ ...form, localizacao: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Estoque mínimo</Label>
-              <Input type="number" min="0" value={form.estoque_minimo} onChange={(e) => setForm({ ...form, estoque_minimo: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                value={form.estoque_minimo}
+                onChange={(e) => setForm({ ...form, estoque_minimo: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Preço de custo</Label>
-              <Input type="number" min="0" step="0.01" value={form.preco_custo} onChange={(e) => setForm({ ...form, preco_custo: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.preco_custo}
+                onChange={(e) => setForm({ ...form, preco_custo: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Preço de venda</Label>
-              <Input type="number" min="0" step="0.01" value={form.preco_venda} onChange={(e) => setForm({ ...form, preco_venda: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.preco_venda}
+                onChange={(e) => setForm({ ...form, preco_venda: e.target.value })}
+              />
             </div>
             <div className="flex items-center gap-2 sm:col-span-2 pt-2">
-              <Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} id="ativo" />
-              <Label htmlFor="ativo" className="cursor-pointer">Medicamento ativo</Label>
+              <Switch
+                checked={form.ativo}
+                onCheckedChange={(v) => setForm({ ...form, ativo: v })}
+                id="ativo"
+              />
+              <Label htmlFor="ativo" className="cursor-pointer">
+                Medicamento ativo
+              </Label>
             </div>
             <DialogFooter className="sm:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saveMut.isPending}>{saveMut.isPending ? "Salvando..." : "Salvar"}</Button>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saveMut.isPending}>
+                {saveMut.isPending ? "Salvando..." : "Salvar"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -405,12 +555,15 @@ function MedicamentosPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir medicamento?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O registro será removido permanentemente. Se o produto possui histórico de vendas ou compras, prefira desativá-lo.
+              Esta ação não pode ser desfeita. O registro será removido permanentemente. Se o
+              produto possui histórico de vendas ou compras, prefira desativá-lo.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && deleteMut.mutate(deleteId)}>Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteId && deleteMut.mutate(deleteId)}>
+              Excluir
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

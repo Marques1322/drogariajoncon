@@ -20,20 +20,60 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, canAccess, type AppRole } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
-type Item = { label: string; href: string; icon: React.ComponentType<{ className?: string }>; roles: AppRole[] };
+type Item = {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: AppRole[];
+};
 
 const modules: Item[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "financeiro", "estoque", "atendente", "gerente"] },
-  { label: "Vendas", href: "/vendas", icon: ShoppingCart, roles: ["admin", "gerente", "atendente"] },
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    roles: ["admin", "financeiro", "estoque", "atendente", "gerente"],
+  },
+  {
+    label: "Vendas",
+    href: "/vendas",
+    icon: ShoppingCart,
+    roles: ["admin", "gerente", "atendente"],
+  },
   { label: "Medicamentos", href: "/produtos", icon: Pill, roles: ["admin", "gerente", "estoque"] },
   { label: "Estoque", href: "/estoque", icon: Warehouse, roles: ["admin", "gerente", "estoque"] },
   { label: "Clientes", href: "/clientes", icon: Users, roles: ["admin", "gerente", "atendente"] },
-  { label: "Fornecedores", href: "/fornecedores", icon: Truck, roles: ["admin", "gerente", "estoque"] },
+  {
+    label: "Fornecedores",
+    href: "/fornecedores",
+    icon: Truck,
+    roles: ["admin", "gerente", "estoque"],
+  },
   { label: "Compras", href: "/compras", icon: Receipt, roles: ["admin", "gerente", "estoque"] },
-  { label: "Contas a Pagar", href: "/contas-pagar", icon: CreditCard, roles: ["admin", "gerente", "financeiro"] },
-  { label: "Contas a Receber", href: "/contas-receber", icon: DollarSign, roles: ["admin", "gerente", "financeiro"] },
-  { label: "Financeiro", href: "/financeiro", icon: BarChart3, roles: ["admin", "gerente", "financeiro"] },
-  { label: "Relatórios", href: "/relatorios", icon: FileText, roles: ["admin", "gerente", "financeiro"] },
+  {
+    label: "Contas a Pagar",
+    href: "/contas-pagar",
+    icon: CreditCard,
+    roles: ["admin", "gerente", "financeiro"],
+  },
+  {
+    label: "Contas a Receber",
+    href: "/contas-receber",
+    icon: DollarSign,
+    roles: ["admin", "gerente", "financeiro"],
+  },
+  {
+    label: "Financeiro",
+    href: "/financeiro",
+    icon: BarChart3,
+    roles: ["admin", "gerente", "financeiro"],
+  },
+  {
+    label: "Relatórios",
+    href: "/relatorios",
+    icon: FileText,
+    roles: ["admin", "gerente", "financeiro"],
+  },
   { label: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin"] },
 ];
 
@@ -50,8 +90,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     await supabase.auth.signOut();
   };
 
-  const isActive = (href: string) =>
-    currentPath === href || currentPath.startsWith(href + "/");
+  const isActive = (href: string) => currentPath === href || currentPath.startsWith(href + "/");
 
   const items = modules.filter((m) => canAccess(m.href, roles));
 
@@ -129,9 +168,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       active ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" : "",
                     )}
                   />
-                  {isOpen && (
-                    <span className="relative truncate">{item.label}</span>
-                  )}
+                  {isOpen && <span className="relative truncate">{item.label}</span>}
                   {active && isOpen && (
                     <span
                       aria-hidden

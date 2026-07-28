@@ -82,14 +82,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Pharmacy Flow is a modular ERP for pharmacy management." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Pharmacy Flow is a modular ERP for pharmacy management." },
+      {
+        property: "og:description",
+        content: "Pharmacy Flow is a modular ERP for pharmacy management.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Pharmacy Flow is a modular ERP for pharmacy management." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dccf212e-5ae9-4c05-8e59-9383b7136fe3/id-preview-9b4ea9d7--131293f4-a0fd-4686-a46d-8159ae328562.lovable.app-1784654489056.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dccf212e-5ae9-4c05-8e59-9383b7136fe3/id-preview-9b4ea9d7--131293f4-a0fd-4686-a46d-8159ae328562.lovable.app-1784654489056.png" },
+      {
+        name: "twitter:description",
+        content: "Pharmacy Flow is a modular ERP for pharmacy management.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dccf212e-5ae9-4c05-8e59-9383b7136fe3/id-preview-9b4ea9d7--131293f4-a0fd-4686-a46d-8159ae328562.lovable.app-1784654489056.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dccf212e-5ae9-4c05-8e59-9383b7136fe3/id-preview-9b4ea9d7--131293f4-a0fd-4686-a46d-8159ae328562.lovable.app-1784654489056.png",
+      },
     ],
     links: [
       {
