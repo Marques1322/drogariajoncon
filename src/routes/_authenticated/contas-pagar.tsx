@@ -19,8 +19,9 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect } from "react";
 import { brl } from "@/lib/format";
+import { useMarcarContasAtrasadas } from "@/hooks/use-marcar-atrasadas";
+
 
 export const Route = createFileRoute("/_authenticated/contas-pagar")({
   head: () => ({
@@ -41,10 +42,8 @@ function ContasPagarPage() {
   const [tab, setTab] = useState<Status | "todos" | "vencendo">("pendente");
   const [pagarId, setPagarId] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.rpc("marcar_contas_atrasadas").then(() => qc.invalidateQueries({ queryKey: ["contas-pagar"] }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useMarcarContasAtrasadas("contas-pagar");
+
 
   const listQ = useQuery({
     queryKey: ["contas-pagar", tab, search],

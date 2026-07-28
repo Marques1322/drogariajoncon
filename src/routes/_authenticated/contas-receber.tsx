@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DollarSign, Search, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { brl } from "@/lib/format";
+import { useMarcarContasAtrasadas } from "@/hooks/use-marcar-atrasadas";
+
 
 export const Route = createFileRoute("/_authenticated/contas-receber")({
   head: () => ({
@@ -38,10 +40,8 @@ function ContasReceberPage() {
   const [tab, setTab] = useState("pendente");
   const [receberId, setReceberId] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.rpc("marcar_contas_atrasadas").then(() => qc.invalidateQueries({ queryKey: ["contas-receber"] }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useMarcarContasAtrasadas("contas-receber");
+
 
   const listQ = useQuery({
     queryKey: ["contas-receber", tab, search],
