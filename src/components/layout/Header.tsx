@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useNavigate, Link } from "@tanstack/react-router";
+
 import {
   Bell,
   Search,
