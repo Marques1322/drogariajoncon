@@ -36,15 +36,14 @@ const iconFor = (t: Notificacao["tipo"]) => {
 export function Header() {
   const navigate = useNavigate();
   const { user, roles } = useAuth();
-  const [email, setEmail] = useState<string | null>(null);
   const notifQ = useNotifications();
-
-  useEffect(() => setEmail(user?.email ?? null), [user]);
+  const email = user?.email ?? null;
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
+
 
   const notifs = notifQ.data ?? [];
   const altas = notifs.filter((n) => n.gravidade === "alta").length;
