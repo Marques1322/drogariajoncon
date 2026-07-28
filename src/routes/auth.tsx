@@ -149,16 +149,22 @@ function AuthPage() {
   }
 
   const title =
-    mode === "forgot" ? "Recuperar senha"
-    : mode === "verify" ? "Verificar e-mail"
-    : mode === "signup" ? "Criar sua conta"
-    : "Bem-vindo de volta";
+    mode === "forgot"
+      ? "Recuperar senha"
+      : mode === "verify"
+        ? "Verificar e-mail"
+        : mode === "signup"
+          ? "Criar sua conta"
+          : "Bem-vindo de volta";
 
   const subtitle =
-    mode === "forgot" ? "Informe seu e-mail para receber o link."
-    : mode === "verify" ? `Digite o código de 6 dígitos enviado para ${email}.`
-    : mode === "signup" ? "Cadastre-se para acessar o painel Joncon."
-    : "Acesse o painel de gestão da farmácia.";
+    mode === "forgot"
+      ? "Informe seu e-mail para receber o link."
+      : mode === "verify"
+        ? `Digite o código de 6 dígitos enviado para ${email}.`
+        : mode === "signup"
+          ? "Cadastre-se para acessar o painel Joncon."
+          : "Acesse o painel de gestão da farmácia.";
 
   return (
     <div className="min-h-screen w-full bg-[#111111] lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
@@ -175,7 +181,9 @@ function AuthPage() {
               "linear-gradient(180deg, #111111 0%, #171717 50%, #111111 100%)",
           }}
         />
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)," +
@@ -184,11 +192,31 @@ function AuthPage() {
           }}
         />
 
-        <FloatingIcon icon={<Pill className="h-4 w-4" />} className="left-[14%] top-[22%]" delay="0s" />
-        <FloatingIcon icon={<Heart className="h-4 w-4" />} className="right-[18%] top-[28%]" delay="1.2s" />
-        <FloatingIcon icon={<Stethoscope className="h-4 w-4" />} className="left-[10%] bottom-[30%]" delay="2.4s" />
-        <FloatingIcon icon={<Shield className="h-4 w-4" />} className="right-[12%] bottom-[22%]" delay="0.6s" />
-        <FloatingIcon icon={<Cross className="h-4 w-4" />} className="left-[52%] top-[16%]" delay="1.8s" />
+        <FloatingIcon
+          icon={<Pill className="h-4 w-4" />}
+          className="left-[14%] top-[22%]"
+          delay="0s"
+        />
+        <FloatingIcon
+          icon={<Heart className="h-4 w-4" />}
+          className="right-[18%] top-[28%]"
+          delay="1.2s"
+        />
+        <FloatingIcon
+          icon={<Stethoscope className="h-4 w-4" />}
+          className="left-[10%] bottom-[30%]"
+          delay="2.4s"
+        />
+        <FloatingIcon
+          icon={<Shield className="h-4 w-4" />}
+          className="right-[12%] bottom-[22%]"
+          delay="0.6s"
+        />
+        <FloatingIcon
+          icon={<Cross className="h-4 w-4" />}
+          className="left-[52%] top-[16%]"
+          delay="1.8s"
+        />
 
         {/* Top: logo */}
         <div className="relative z-10 flex items-center gap-4">
@@ -210,8 +238,8 @@ function AuthPage() {
             <br /> e confiança.
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-zinc-400">
-            Sistema premium de gestão farmacêutica — do balcão ao estoque,
-            do PDV ao financeiro. Tudo em um só lugar.
+            Sistema premium de gestão farmacêutica — do balcão ao estoque, do PDV ao financeiro.
+            Tudo em um só lugar.
           </p>
           <EcgWave className="mt-10" />
         </div>
@@ -223,7 +251,10 @@ function AuthPage() {
             { k: "Estoque", v: "Em tempo real" },
             { k: "Relatórios", v: "BI integrado" },
           ].map((it) => (
-            <div key={it.k} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur">
+            <div
+              key={it.k}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur"
+            >
               <div className="text-[10px] font-semibold uppercase tracking-widest text-[#F97316]">
                 {it.k}
               </div>
@@ -275,12 +306,27 @@ function AuthPage() {
               >
                 {resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : "Reenviar código"}
               </button>
-              <BackLink onClick={() => { setOtp(""); setMode("login"); }}>Usar outro e-mail</BackLink>
+              <BackLink
+                onClick={() => {
+                  setOtp("");
+                  setMode("login");
+                }}
+              >
+                Usar outro e-mail
+              </BackLink>
             </form>
           ) : mode === "forgot" ? (
             <form onSubmit={handleForgot} className="space-y-5">
-              <BigField id="forgot-email" label="E-mail" icon={<Mail className="h-4 w-4" />} type="email" required
-                value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@drogariajoncon.com" />
+              <BigField
+                id="forgot-email"
+                label="E-mail"
+                icon={<Mail className="h-4 w-4" />}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="voce@drogariajoncon.com"
+              />
               <OrangeButton type="submit" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar link de redefinição"}
               </OrangeButton>
@@ -288,14 +334,39 @@ function AuthPage() {
             </form>
           ) : mode === "signup" ? (
             <form onSubmit={handleSignup} className="space-y-4">
-              <BigField id="signup-nome" label="Nome completo" icon={<UserIcon className="h-4 w-4" />} required
-                value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" />
-              <BigField id="signup-email" label="E-mail" icon={<Mail className="h-4 w-4" />} type="email" required
-                value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@drogariajoncon.com" />
-              <BigField id="signup-password" label="Senha" icon={<Lock className="h-4 w-4" />}
-                type={showPassword ? "text" : "password"} required minLength={6} value={password}
-                onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres"
-                trailing={<PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />} />
+              <BigField
+                id="signup-nome"
+                label="Nome completo"
+                icon={<UserIcon className="h-4 w-4" />}
+                required
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Seu nome"
+              />
+              <BigField
+                id="signup-email"
+                label="E-mail"
+                icon={<Mail className="h-4 w-4" />}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="voce@drogariajoncon.com"
+              />
+              <BigField
+                id="signup-password"
+                label="Senha"
+                icon={<Lock className="h-4 w-4" />}
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                trailing={
+                  <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
+                }
+              />
               <OrangeButton type="submit" disabled={loading}>
                 {loading ? "Criando..." : "Criar conta"}
               </OrangeButton>
@@ -303,19 +374,42 @@ function AuthPage() {
               <GoogleButton onClick={handleGoogle} />
               <p className="text-center text-sm text-zinc-500">
                 Já tem uma conta?{" "}
-                <button type="button" onClick={() => setMode("login")}
-                  className="font-semibold text-[#F97316] hover:underline">Entrar</button>
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="font-semibold text-[#F97316] hover:underline"
+                >
+                  Entrar
+                </button>
               </p>
             </form>
           ) : (
             <form onSubmit={handleLogin} className="space-y-4">
-              <BigField id="login-email" label="Usuário" icon={<Mail className="h-4 w-4" />} type="email" required
+              <BigField
+                id="login-email"
+                label="Usuário"
+                icon={<Mail className="h-4 w-4" />}
+                type="email"
+                required
                 autoComplete="email"
-                value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@drogariajoncon.com" />
-              <BigField id="login-password" label="Senha" icon={<Lock className="h-4 w-4" />}
-                type={showPassword ? "text" : "password"} required autoComplete="current-password"
-                value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-                trailing={<PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />} />
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="voce@drogariajoncon.com"
+              />
+              <BigField
+                id="login-password"
+                label="Senha"
+                icon={<Lock className="h-4 w-4" />}
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                trailing={
+                  <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
+                }
+              />
               <div className="flex items-center justify-between text-sm">
                 <label className="inline-flex cursor-pointer items-center gap-2 text-zinc-600">
                   <input
@@ -326,8 +420,11 @@ function AuthPage() {
                   />
                   Lembrar login
                 </label>
-                <button type="button" onClick={() => setMode("forgot")}
-                  className="font-medium text-zinc-600 transition-colors hover:text-[#F97316]">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="font-medium text-zinc-600 transition-colors hover:text-[#F97316]"
+                >
                   Esqueci minha senha
                 </button>
               </div>
@@ -338,8 +435,13 @@ function AuthPage() {
               <GoogleButton onClick={handleGoogle} />
               <p className="text-center text-sm text-zinc-500">
                 Não tem uma conta?{" "}
-                <button type="button" onClick={() => setMode("signup")}
-                  className="font-semibold text-[#F97316] hover:underline">Cadastre-se</button>
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className="font-semibold text-[#F97316] hover:underline"
+                >
+                  Cadastre-se
+                </button>
               </p>
             </form>
           )}
@@ -355,7 +457,11 @@ function AuthPage() {
 
 /* ============ subcomponents ============ */
 
-function OrangeButton({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+function OrangeButton({
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}
@@ -375,9 +481,17 @@ function OrangeButton({ children, className, ...props }: React.ButtonHTMLAttribu
 }
 
 function BigField({
-  id, label, icon, trailing, ...props
-}: { id: string; label: string; icon: React.ReactNode; trailing?: React.ReactNode } &
-   React.InputHTMLAttributes<HTMLInputElement>) {
+  id,
+  label,
+  icon,
+  trailing,
+  ...props
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  trailing?: React.ReactNode;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -513,10 +627,22 @@ function EcgWave({ className }: { className?: string }) {
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" aria-hidden className={className}>
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.62l6.87-6.87C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.62l6.87-6.87C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
     </svg>
   );
 }

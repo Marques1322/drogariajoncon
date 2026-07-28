@@ -14,8 +14,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PharmacyBadge } from "@/components/ui/pharmacy-badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { brl } from "@/lib/format";
@@ -29,7 +35,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   }),
   component: DashboardPage,
 });
-
 
 function addDays(d: Date, days: number) {
   const c = new Date(d);
@@ -91,9 +96,7 @@ async function fetchLowStockItems() {
   try {
     const { data } = await supabase
       .from("medicamentos")
-      .select(
-        "id, nome, estoque_minimo, categoria:categorias(nome)",
-      )
+      .select("id, nome, estoque_minimo, categoria:categorias(nome)")
       .eq("ativo", true)
       .limit(10);
 
@@ -156,8 +159,12 @@ function MetricCard({ title, value, icon, status, trend, trendUp, color }: Metri
             {status && <p className="text-xs text-slate-500 mt-2">{status}</p>}
             {trend && (
               <div className="flex items-center gap-1 mt-2">
-                <ArrowUpRight className={`w-4 h-4 ${trendUp ? "text-emerald-600" : "text-red-600"}`} />
-                <span className={`text-xs font-semibold ${trendUp ? "text-emerald-600" : "text-red-600"}`}>
+                <ArrowUpRight
+                  className={`w-4 h-4 ${trendUp ? "text-emerald-600" : "text-red-600"}`}
+                />
+                <span
+                  className={`text-xs font-semibold ${trendUp ? "text-emerald-600" : "text-red-600"}`}
+                >
                   {trend}
                 </span>
               </div>
@@ -259,7 +266,9 @@ function DashboardPage() {
                       <TableHead className="font-semibold text-slate-700">Valor</TableHead>
                       <TableHead className="font-semibold text-slate-700">Data</TableHead>
                       <TableHead className="font-semibold text-slate-700">Status</TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700">Ação</TableHead>
+                      <TableHead className="text-right font-semibold text-slate-700">
+                        Ação
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -272,22 +281,34 @@ function DashboardPage() {
                     ) : (
                       data?.vendas.map((v: any) => (
                         <TableRow key={v.id} className="border-slate-100 hover:bg-slate-50/50">
-                          <TableCell className="font-mono text-sm text-slate-600">{v.id.slice(0, 8)}</TableCell>
-                          <TableCell className="text-sm text-slate-900 font-medium">{v.cliente?.nome ?? "—"}</TableCell>
-                          <TableCell className="text-sm font-semibold text-slate-900">{brl(v.valor_total)}</TableCell>
+                          <TableCell className="font-mono text-sm text-slate-600">
+                            {v.id.slice(0, 8)}
+                          </TableCell>
+                          <TableCell className="text-sm text-slate-900 font-medium">
+                            {v.cliente?.nome ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-sm font-semibold text-slate-900">
+                            {brl(v.valor_total)}
+                          </TableCell>
                           <TableCell className="text-sm text-slate-600">
                             {format(new Date(v.data_venda), "dd/MM/yy", { locale: ptBR })}
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant={v.status === "concluida" ? "default" : "secondary"}
-                              className={v.status === "concluida" ? "bg-emerald-100 text-emerald-800" : ""}
+                              className={
+                                v.status === "concluida" ? "bg-emerald-100 text-emerald-800" : ""
+                              }
                             >
                               {v.status === "concluida" ? "Concluída" : "Pendente"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="text-teal-600 hover:bg-teal-50 text-xs">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-teal-600 hover:bg-teal-50 text-xs"
+                            >
                               Detalhes
                             </Button>
                           </TableCell>
@@ -357,9 +378,13 @@ function DashboardPage() {
                 <TableBody>
                   {lowStockData.data?.map((item: any) => (
                     <TableRow key={item.id} className="border-slate-100 hover:bg-slate-50/50">
-                      <TableCell className="text-sm text-slate-900 font-medium">{item.nome}</TableCell>
+                      <TableCell className="text-sm text-slate-900 font-medium">
+                        {item.nome}
+                      </TableCell>
                       <TableCell>
-                        <span className="text-sm font-semibold text-orange-600">5 / {item.estoque_minimo}</span>
+                        <span className="text-sm font-semibold text-orange-600">
+                          5 / {item.estoque_minimo}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -409,12 +434,11 @@ function DashboardPage() {
                 </TableHeader>
                 <TableBody>
                   {expiringData.data?.map((item: any) => {
-                    const daysToExpiry = Math.floor(
-                      (new Date(item.validade).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-                    );
                     return (
                       <TableRow key={item.id} className="border-slate-100 hover:bg-slate-50/50">
-                        <TableCell className="text-sm text-slate-900 font-medium">{item.medicamento?.nome}</TableCell>
+                        <TableCell className="text-sm text-slate-900 font-medium">
+                          {item.medicamento?.nome}
+                        </TableCell>
                         <TableCell>
                           <span className="text-sm font-semibold text-red-600">
                             {format(new Date(item.validade), "dd/MM/yy")}

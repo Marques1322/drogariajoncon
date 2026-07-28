@@ -49,7 +49,10 @@ export function dateTimeBR(value: Date | string | null | undefined): string {
 }
 
 /** Compute margin (%) from cost/sale prices. Returns `null` when undefined. */
-export function margin(cost: number | null | undefined, sale: number | null | undefined): number | null {
+export function margin(
+  cost: number | null | undefined,
+  sale: number | null | undefined,
+): number | null {
   const c = Number(cost ?? 0);
   const s = Number(sale ?? 0);
   if (!s) return null;

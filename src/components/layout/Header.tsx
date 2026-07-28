@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
+
 import {
   Bell,
   Search,
@@ -26,20 +26,22 @@ import { useNotifications, type Notificacao } from "@/hooks/use-notifications";
 
 const iconFor = (t: Notificacao["tipo"]) => {
   switch (t) {
-    case "vencimento": return AlertTriangle;
-    case "estoque_baixo": return Package;
-    case "conta_pagar": return Receipt;
-    case "conta_receber": return DollarSign;
+    case "vencimento":
+      return AlertTriangle;
+    case "estoque_baixo":
+      return Package;
+    case "conta_pagar":
+      return Receipt;
+    case "conta_receber":
+      return DollarSign;
   }
 };
 
 export function Header() {
   const navigate = useNavigate();
   const { user, roles } = useAuth();
-  const [email, setEmail] = useState<string | null>(null);
   const notifQ = useNotifications();
-
-  useEffect(() => setEmail(user?.email ?? null), [user]);
+  const email = user?.email ?? null;
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -123,16 +125,12 @@ export function Header() {
                         <Icon
                           className={
                             "mt-0.5 h-4 w-4 shrink-0 " +
-                            (n.gravidade === "alta"
-                              ? "text-[#EF4444]"
-                              : "text-[#FACC15]")
+                            (n.gravidade === "alta" ? "text-[#EF4444]" : "text-[#FACC15]")
                           }
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium">{n.titulo}</p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {n.descricao}
-                          </p>
+                          <p className="truncate text-xs text-muted-foreground">{n.descricao}</p>
                         </div>
                       </Link>
                     </DropdownMenuItem>
